@@ -1,0 +1,17 @@
+{
+  "case_id": "case_006",
+  "patient_id": "P001",
+  "quartal": "2/2026",
+  "scenario": "Complex visit — multiple billable procedures, new cardiac finding",
+  "dictation": "Herr Müller, 67 Jahre. Notfallkonsultation wegen akuter Kurzatmigkeit und beidseitiger Unterschenkelödeme seit gestern. Körperliche Untersuchung: RR 168/98, Herzfrequenz 112 unregelmäßig. Lungenfunktion gemessen: FEV1/FVC 0,61, Hinweis auf obstruktive Ventilationsstörung. EKG: tachykardes Vorhofflimmern, neu aufgetreten. Infusion Furosemid 40mg i.v. angelegt. Patient stabilisiert. Stationäre Einweisung in Kardiologie ausgestellt.",
+  "procedures": [
+    "Körperliche Untersuchung",
+    "Blutdruckmessung",
+    "Lungenfunktionsmessung (Spirometrie)",
+    "EKG-Ableitung (Ruhe-EKG)",
+    "Intravenöse Infusion (Furosemid 40mg)",
+    "Stationäre Einweisung"
+  ],
+  "expected_gops": ["03330", "03321", "02100", "01430"],
+  "notes": "03330 Spirometrie, 03321 EKG, 02100 Infusion i.v., 01430 Verwaltungskomplex (Einweisung). 03000/03030 bereits in diesem Quartal abgerechnet."
+}

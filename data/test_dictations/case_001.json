@@ -1,0 +1,15 @@
+{
+  "case_id": "case_001",
+  "patient_id": "P001",
+  "quartal": "2/2026",
+  "scenario": "Routine follow-up chronic patient — Pauschalen already billed this quarter",
+  "dictation": "Herr Müller, 67 Jahre. Kontrolltermin wegen Hypertonie und Diabetes Typ 2. Blutdruck heute 152/94, leicht erhöht. Ramipril von 5mg auf 10mg erhöht, Rezept ausgestellt. Blutzucker nüchtern 138 mg/dl. EKG abgeleitet, Sinusrhythmus, keine Auffälligkeiten. Überweisung zum Diabetologen ausgestellt.",
+  "procedures": [
+    "Blutdruckmessung",
+    "EKG-Ableitung (Ruhe-EKG)",
+    "Rezeptausstellung",
+    "Überweisung"
+  ],
+  "expected_gops": ["03321", "01430"],
+  "notes": "03000 und 03030 bereits abgerechnet dieses Quartal. 03321 für EKG. 01430 Verwaltungskomplex für Überweisung."
+}

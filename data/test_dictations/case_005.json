@@ -1,0 +1,18 @@
+{
+  "case_id": "case_005",
+  "patient_id": "P003",
+  "quartal": "2/2026",
+  "scenario": "Child first contact — U11 preventive exam, pediatric GOPs apply",
+  "dictation": "Felix Wagner, 8 Jahre. Vorsorgeuntersuchung U11. Körperliche Untersuchung: Größe 128 cm, Gewicht 26 kg, BMI im Normbereich. Blutdruck 100/65. Sehtest mit Sehtafel: beidseits 1,0. Hörtest Fingerreiben: unauffällig. Urinuntersuchung Teststreifen: ohne Befund. Eltern über gesunde Ernährung und Mediennutzung beraten. Impfstatus geprüft: Td-IPV-Auffrischung fällig, Rezept mitgegeben.",
+  "procedures": [
+    "Körperliche Untersuchung inkl. Anthropometrie",
+    "Blutdruckmessung",
+    "Sehtest",
+    "Hörtest",
+    "Urin-Teststreifen",
+    "Ernährungs- und Medienberatung",
+    "Impfstatuskontrolle"
+  ],
+  "expected_gops": ["04000", "04355"],
+  "notes": "Kinder-GOPs Kapitel 4: 04000 Versichertenpauschale Kinder. 04355 Vorsorgeuntersuchung U11. Impfberatung in Pauschale enthalten."
+}
