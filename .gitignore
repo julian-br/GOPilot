@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual envs / conda
+.venv/
+venv/
+env/
+.conda/
+
+# ChromaDB persisted data
+data/chroma_db/
+
+# Raw EBM source data (large, not versioned)
+data/ebm_raw/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / config
+.env
+*.env.local
+
+# Logs
+*.log
+logs/
