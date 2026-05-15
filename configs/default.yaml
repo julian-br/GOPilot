@@ -1,0 +1,8 @@
+experiment: default
+model: qwen3.5:9b
+top_k: 10
+thinking: false
+conditions:
+  - basic
+  - rag
+  - agent

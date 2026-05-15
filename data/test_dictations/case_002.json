@@ -2,6 +2,7 @@
   "case_id": "case_002",
   "patient_id": "P001",
   "quartal": "3/2026",
+  "already_billed_gops": [],
   "scenario": "First contact new quarter — chronic patient, all Pauschalen available again",
   "dictation": "Herr Müller, 67 Jahre. Erstkontakt neues Quartal. Hypertonie stabil, Blutdruck 138/86 unter aktueller Medikation. Diabetes gut eingestellt, HbA1c 6,9%. Rezepte für Ramipril und Metformin ausgestellt. Langzeit-Blutdruckmessung angelegt, Patient gibt Gerät morgen ab.",
   "procedures": [
@@ -10,6 +11,6 @@
     "Beratung Hypertonie und Diabetes",
     "Rezeptausstellung Dauermedikation"
   ],
-  "expected_gops": ["03000", "03030", "03324"],
-  "notes": "Neues Quartal: 03000 Versichertenpauschale und 03030 Chronikerpauschale wieder abrechenbar. 03324 für ABDM."
+  "expected_gops": ["03000", "03220", "03324"],
+  "notes": "Neues Quartal: 03000 Versichertenpauschale und 03220 Chronikerzuschlag bei lebensverändernder chronischer Erkrankung wieder abrechenbar. 03030 ist keine Chronikerpauschale, sondern die Versichertenpauschale bei unvorhergesehener Inanspruchnahme zu Randzeiten. 03324 für ABDM/Langzeit-Blutdruckmessung."
 }

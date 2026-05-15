@@ -2,6 +2,7 @@
   "case_id": "case_004",
   "patient_id": "P002",
   "quartal": "2/2026",
+  "already_billed_gops": ["03000"],
   "scenario": "Follow-up same quarter — short control visit, no new billable procedures",
   "dictation": "Frau Schmidt, 34 Jahre. Kontrolltermin nach Angina. Symptome vollständig abgeklungen, Rachen reizlos, kein Fieber mehr. Keine weiteren Beschwerden. Patientin arbeitsfähig, keine weiteren Maßnahmen nötig.",
   "procedures": [

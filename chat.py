@@ -1,18 +1,18 @@
-import ollama
+from datetime import date
 
-MODEL = "qwen3.5:9b"
+from src.agent import MODEL, run_agent
 
-print(f"GOPilot — model: {MODEL}  (empty input to quit)\n")
+today = date.today()
+default_quartal = f"{(today.month - 1) // 3 + 1}/{today.year}"
 
-messages = []
+print(f"GOPilot — model: {MODEL}  (empty dictation to quit)\n")
+patient_id = input("Patient-ID [P001]: ").strip() or "P001"
+quartal = input(f"Quartal [{default_quartal}]: ").strip() or default_quartal
+
 while True:
-    user_input = input("You: ").strip()
+    user_input = input("\nDiktat: ").strip()
     if not user_input:
         break
 
-    messages.append({"role": "user", "content": user_input})
-    response = ollama.chat(model=MODEL, messages=messages)
-    reply = response.message.content
-
-    messages.append({"role": "assistant", "content": reply})
-    print(f"\nAssistant: {reply}\n")
+    result = run_agent(user_input, patient_id=patient_id, quartal=quartal)
+    print(f"\nGOPilot: {result['response']}\n")

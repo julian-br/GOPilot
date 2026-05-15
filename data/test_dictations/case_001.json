@@ -2,6 +2,7 @@
   "case_id": "case_001",
   "patient_id": "P001",
   "quartal": "2/2026",
+  "already_billed_gops": ["03000", "03220"],
   "scenario": "Routine follow-up chronic patient — Pauschalen already billed this quarter",
   "dictation": "Herr Müller, 67 Jahre. Kontrolltermin wegen Hypertonie und Diabetes Typ 2. Blutdruck heute 152/94, leicht erhöht. Ramipril von 5mg auf 10mg erhöht, Rezept ausgestellt. Blutzucker nüchtern 138 mg/dl. EKG abgeleitet, Sinusrhythmus, keine Auffälligkeiten. Überweisung zum Diabetologen ausgestellt.",
   "procedures": [
@@ -10,6 +11,6 @@
     "Rezeptausstellung",
     "Überweisung"
   ],
-  "expected_gops": ["03321", "01430"],
-  "notes": "03000 und 03030 bereits abgerechnet dieses Quartal. 03321 für EKG. 01430 Verwaltungskomplex für Überweisung."
+  "expected_gops": ["03221"],
+  "notes": "03000 und 03220 bereits abgerechnet dieses Quartal. 03221 ist als Zuschlag zur 03220 bei mindestens zwei persönlichen Arzt-Patienten-Kontakten und Therapieanpassung plausibel. Das dokumentierte EKG ist ein Ruhe-EKG und keine Belastungs-EKG-GOP 03321. 01430 gilt für Überweisung/Wiederholungsrezept ohne persönlichen Arzt-Patienten-Kontakt und passt hier nicht."
 }

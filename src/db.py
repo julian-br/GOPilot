@@ -21,15 +21,15 @@ CREATE TABLE IF NOT EXISTS quarterly_billing (
 """
 
 SEED_PATIENTS = [
-    ("P001", "Müller, Hans",   1958, "M", "AOK Bayern"),
-    ("P002", "Schmidt, Anna",  1991, "F", "TK"),
-    ("P003", "Wagner, Felix",  2017, "M", "Barmer"),
+    ("P001", "Müller, Hans",   1959, "M", "AOK Bayern"),
+    ("P002", "Schmidt, Anna",  1992, "F", "TK"),
+    ("P003", "Wagner, Felix",  2018, "M", "Barmer"),
 ]
 
 # GOPs already billed for P001 this quarter (chronic patient, was here before)
 SEED_BILLING = [
     ("P001", "2/2026", "03000"),  # Versichertenpauschale already used
-    ("P001", "2/2026", "03030"),  # Chronikerpauschale already used
+    ("P001", "2/2026", "03220"),  # Chronikerzuschlag already used
 ]
 
 
@@ -47,11 +47,15 @@ def init_db() -> None:
 
 def seed_db() -> None:
     with get_connection() as conn:
+        seed_ids = [p[0] for p in SEED_PATIENTS]
         conn.executemany(
-            "INSERT OR IGNORE INTO patients VALUES (?,?,?,?,?)", SEED_PATIENTS
+            "DELETE FROM quarterly_billing WHERE patient_id = ?", [(pid,) for pid in seed_ids]
         )
         conn.executemany(
-            "INSERT OR IGNORE INTO quarterly_billing VALUES (?,?,?)", SEED_BILLING
+            "INSERT OR REPLACE INTO patients VALUES (?,?,?,?,?)", SEED_PATIENTS
+        )
+        conn.executemany(
+            "INSERT OR REPLACE INTO quarterly_billing VALUES (?,?,?)", SEED_BILLING
         )
 
 

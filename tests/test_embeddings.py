@@ -30,10 +30,11 @@ PROBES = [
     ("Spirometrie Lungenfunktion FEV1 exspiratorisch",        "03330", "Spirometrie"),
     ("Infusion intravenös i.v. Kurzinfusion",                 "02100", "IV Infusion"),
     ("Schnelltest Antigennachweisverfahren Streptokokken Gruppe A Kind", "32152", "Strep-Schnelltest Kind"),
-    ("Verwaltungskomplex Überweisung Einweisung Rezept",      "01430", "Verwaltungskomplex"),
+    ("Verwaltungskomplex Überweisung Wiederholungsrezept ohne persönlichen Kontakt", "01430", "Verwaltungskomplex"),
     # Pauschalen — fachgruppe now in document
     ("Versichertenpauschale Hausarzt allgemeinmedizinisch",   "03000", "Versichertenpauschale HA"),
-    ("Versichertenpauschale unvorhergesehene Inanspruchnahme","03030", "Versichertenpauschale Notdienst"),
+    ("Versichertenpauschale unvorhergesehene Inanspruchnahme Randzeiten", "03030", "VP unvorhergesehen"),
+    ("Chronikerzuschlag lebensverändernde chronische Erkrankung Hausarzt", "03220", "Chronikerzuschlag HA"),
     ("Versichertenpauschale Kinder Jugendmedizin",            "04000", "Versichertenpauschale Kinder"),
     # Semantic / indirect
     ("Ergometrie Belastungstest EKG Hausarzt",                "03321", "Belastungs-EKG (semantisch)"),
@@ -48,18 +49,6 @@ PROBES = [
 # These probes confirm what DOESN'T work so we know where the agent needs to translate.
 # Source: data/test_dictations/case_*.json
 COLLOQUIAL_PROBES = [
-    # case_001: EKG abgeleitet → 03321
-    (
-        "EKG abgeleitet, Sinusrhythmus, keine Auffälligkeiten",
-        "03321",
-        "Diktat: EKG abgeleitet",
-    ),
-    # case_001: Überweisung ausgestellt → 01430
-    (
-        "Überweisung zum Diabetologen ausgestellt",
-        "01430",
-        "Diktat: Überweisung ausgestellt",
-    ),
     # case_002: Langzeit-RR → 03324
     (
         "Langzeit-Blutdruckmessung angelegt, Patient gibt Gerät morgen ab",
@@ -74,7 +63,7 @@ COLLOQUIAL_PROBES = [
     ),
     # case_006: Infusion → 02100
     (
-        "Infusion Furosemid 40mg i.v. angelegt, Patient stabilisiert",
+        "Infusion Furosemid 40mg i.v. über 20 Minuten angelegt, Patient stabilisiert",
         "02100",
         "Diktat: Furosemid i.v.",
     ),
@@ -83,12 +72,6 @@ COLLOQUIAL_PROBES = [
         "Lungenfunktion gemessen: FEV1/FVC 0,61, Hinweis auf obstruktive Ventilationsstörung",
         "03330",
         "Diktat: Lungenfunktion FEV1/FVC",
-    ),
-    # case_006: stationäre Einweisung → 01430
-    (
-        "Stationäre Einweisung in Kardiologie ausgestellt",
-        "01430",
-        "Diktat: Stationäre Einweisung",
     ),
 ]
 

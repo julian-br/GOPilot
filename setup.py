@@ -10,15 +10,15 @@ Usage:
 import argparse
 import subprocess
 import sys
-from pathlib import Path
 
 import ollama
 
+from src.agent import MODEL
 from src.db import init_db, seed_db
 from src.fetch_ebm import fetch_latest_pdf
-from src.ingest import ingest
+from src.ingest import EMBED_MODEL, ingest
 
-REQUIRED_MODELS = ["qwen3.5:9b", "qwen3-embedding:4b"]
+REQUIRED_MODELS = [MODEL, EMBED_MODEL]
 
 
 def step(msg: str) -> None:
@@ -54,7 +54,6 @@ def setup_db() -> None:
 
 def setup_vectordb() -> None:
     step("Fetching latest EBM PDF and ingesting into ChromaDB")
-    chroma_path = Path("data/chroma_db")
     pdf_path = fetch_latest_pdf()
     ingest(pdf_path)
 
@@ -78,6 +77,7 @@ def main() -> None:
 
     step("Setup complete")
     print("  Run 'python chat.py' to start chatting with the model.")
+    print("  Run 'python -m src.eval' to evaluate the current test dictations.")
     print("  Run 'python -m src.fetch_ebm' to re-fetch and re-ingest EBM data.")
 
 

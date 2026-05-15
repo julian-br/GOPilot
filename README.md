@@ -18,7 +18,7 @@ conda activate gopilot
 python setup.py
 ```
 
-That's it. Setup pulls `qwen3.5:9b` and `nomic-embed-text` via Ollama, downloads
+That's it. Setup pulls `qwen3.5:9b` and `qwen3-embedding:4b` via Ollama, downloads
 the latest KBV EBM PDF, parses all GOPs and stores them in ChromaDB.
 
 ## Usage
@@ -26,6 +26,9 @@ the latest KBV EBM PDF, parses all GOPs and stores them in ChromaDB.
 ```bash
 # Chat with the model
 python chat.py
+
+# Evaluate all configured conditions and write reports/default.json
+python -m src.eval
 
 # Re-fetch and re-ingest latest EBM (e.g. after a quarterly update)
 python -m src.fetch_ebm
@@ -39,16 +42,26 @@ python -m src.fetch_ebm --ingest-only
 ```
 GOPilot/
 ├── setup.py                   # one-shot setup script
-├── chat.py                    # interactive chat
+├── chat.py                    # interactive agent chat
+├── configs/
+│   └── default.yaml           # evaluation conditions
 ├── src/
+│   ├── agent.py               # tool-capable billing agent
 │   ├── db.py                  # SQLite mock patient DB
+│   ├── eval.py                # evaluation runner
 │   ├── fetch_ebm.py           # fetch latest KBV EBM PDF
+│   ├── inference.py           # LLM prompt + GOP parsing
 │   └── ingest.py              # PDF parser + ChromaDB ingest
 ├── data/
 │   ├── ebm_raw/               # downloaded EBM PDFs
 │   ├── chroma_db/             # vector DB (generated)
 │   ├── gopilot.db             # SQLite patient DB (generated)
 │   └── test_dictations/       # test cases with ground truth GOPs
-├── environment.yml
-└── pyproject.toml
+├── reports/
+│   └── default.json           # latest evaluation report
+└── environment.yml
 ```
+
+### TODO
+
+Real test cases. In the best case we would use real (anomynized) medical data
