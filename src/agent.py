@@ -467,7 +467,11 @@ def run_agent(
 
     patient_ctx = get_patient(patient_id, quartal)
     if patient_ctx is not None and already_billed_gops is not None:
-        patient_ctx = {**patient_ctx, "gops_already_billed": already_billed_gops}
+        patient_ctx = {
+            **patient_ctx,
+            "gops_already_billed": already_billed_gops,
+            "first_contact_this_quarter": len(already_billed_gops) == 0,
+        }
     tool_log.append({"tool": "get_patient", "args": {"patient_id": patient_id, "quartal": quartal}, "result": patient_ctx})
 
     try:
@@ -515,6 +519,9 @@ def run_agent(
             entry["best_rank"] = min(entry["best_rank"], rank)
             if hit.get("distance") is not None:
                 entry["best_distance"] = min(entry.get("best_distance") or hit["distance"], hit["distance"])
+
+    # Inject fundamental Pauschalen that semantic search misses when specific procedures dominate
+    _inject_pauschal_candidates(candidates, patient_ctx, tool_log)
 
     rerank_text = f"{dictation}\n\n{hypothetical_document}"
     for gop in _rank_candidate_codes(
@@ -574,6 +581,46 @@ def _call_tool(fn, args: dict):
         return fn(**args)
     except Exception as e:
         return f"Error: {e}"
+
+
+def _inject_pauschal_candidates(
+    candidates: dict[str, dict],
+    patient_ctx: dict | None,
+    tool_log: list,
+) -> None:
+    """Force-add Versichertenpauschale and Chronikerzuschlag when context warrants it.
+
+    Semantic search is dominated by specific procedures (ABDM, Spirographie, etc.) and
+    regularly fails to retrieve these high-frequency codes. We inject them directly so
+    the reranker and decision model can evaluate them on their merits.
+    """
+    if not patient_ctx:
+        return
+    already_billed = set(patient_ctx.get("gops_already_billed", []))
+    is_first_contact = patient_ctx.get("first_contact_this_quarter", False)
+    has_conditions = bool(patient_ctx.get("conditions"))
+
+    injections: list[tuple[str, str]] = []
+    if is_first_contact and "03000" not in already_billed:
+        injections.append(("03000", "pauschal_erstkontakt"))
+    if is_first_contact and has_conditions and "03220" not in already_billed:
+        injections.append(("03220", "pauschal_chroniker"))
+
+    for gop_code, label in injections:
+        if gop_code in candidates:
+            continue
+        details = _call_tool(get_gop_details, {"gop": gop_code})
+        tool_log.append({"tool": "get_gop_details", "args": {"gop": gop_code, "source": label}, "result": details})
+        if isinstance(details, dict):
+            candidates[gop_code] = {
+                "gop": gop_code,
+                "source_terms": [label],
+                "query_texts": [],
+                "best_rank": 0,
+                "best_distance": 0.0,
+                "search_hit": details,
+                "details": details,
+            }
 
 
 def _rank_candidate_codes(
@@ -943,7 +990,7 @@ def _decide_from_candidates(
         )
     except ollama.ResponseError:
         return "[]"
-    return (response.message.content or "").strip()
+    return _filter_decision_response((response.message.content or "").strip(), allowed_gops)
 
 
 def _candidate_for_prompt(candidate: dict) -> dict:
