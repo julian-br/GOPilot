@@ -41,6 +41,8 @@ class EvalConfig:
     model: str = "qwen3.5:9b"
     top_k: int = 10
     thinking: bool = False
+    practice_fachgruppe: str = "Hausärztlicher Versorgungsbereich"
+    reranker_model: str | None = "BAAI/bge-reranker-v2-m3"
     conditions: list[Condition] = field(default_factory=lambda: ["basic", "rag", "agent"])
 
     @classmethod
@@ -108,6 +110,8 @@ def run_condition(
             quartal=case["quartal"],
             model=cfg.model,
             think=cfg.thinking,
+            practice_fachgruppe=cfg.practice_fachgruppe,
+            reranker_model=cfg.reranker_model,
             already_billed_gops=case.get("already_billed_gops"),
         )
         raw = result["response"]
@@ -115,8 +119,13 @@ def run_condition(
         return {
             "predicted": predicted,
             "raw_response": raw,
+            "search_plan": result.get("search_plan", []),
+            "hypothetical_document": result.get("hypothetical_document"),
+            "reranker": result.get("reranker"),
+            "practice_fachgruppe": cfg.practice_fachgruppe,
             "tool_log": result["tool_log"],
             "steps": result["steps"],
+            "error": result.get("error"),
             "metrics": metrics(predicted, case["expected_gops"]),
         }
 

@@ -1,19 +1,14 @@
 {
   "case_id": "case_005",
-  "patient_id": "P003",
+  "patient_id": "P004",
   "quartal": "2/2026",
-  "already_billed_gops": [],
-  "scenario": "Child first contact — U11 preventive exam, pediatric GOPs apply",
-  "dictation": "Felix Wagner, 8 Jahre. Vorsorgeuntersuchung U11. Körperliche Untersuchung: Größe 128 cm, Gewicht 26 kg, BMI im Normbereich. Blutdruck 100/65. Sehtest mit Sehtafel: beidseits 1,0. Hörtest Fingerreiben: unauffällig. Urinuntersuchung Teststreifen: ohne Befund. Eltern über gesunde Ernährung und Mediennutzung beraten. Impfstatus geprüft: Td-IPV-Auffrischung fällig, Rezept mitgegeben.",
+  "already_billed_gops": ["03000"],
+  "scenario": "Wiederholungsrezept und Überweisung ohne persönlichen Arzt-Patienten-Kontakt",
+  "dictation": "Herr Becker, 50 Jahre. Kein persönlicher Arzt-Patienten-Kontakt und keine telefonische ärztliche Beratung. Auf Wunsch des Patienten wurden ein Wiederholungsrezept für die Dauermedikation und eine Überweisung zum Orthopäden ausgestellt. Es erfolgte nur die Verwaltungstätigkeit ohne Untersuchung.",
   "procedures": [
-    "Körperliche Untersuchung inkl. Anthropometrie",
-    "Blutdruckmessung",
-    "Sehtest",
-    "Hörtest",
-    "Urin-Teststreifen",
-    "Ernährungs- und Medienberatung",
-    "Impfstatuskontrolle"
+    "Wiederholungsrezept ohne persönlichen Kontakt",
+    "Überweisung ohne persönlichen Kontakt"
   ],
-  "expected_gops": ["04000"],
-  "notes": "Kinder-GOPs Kapitel 4: 04000 Versichertenpauschale Kinder. Die U11 ist im aktuellen EBM nicht als Kinderfrüherkennungs-GOP enthalten; 04355 ist keine U11, sondern eine sozialpädiatrisch orientierte eingehende Beratung/Abklärung bei entsprechender Indikation. Impfstatuskontrolle und einfache Beratung sind in der Pauschale enthalten."
+  "expected_gops": ["01430"],
+  "notes": "01430 beschreibt Wiederholungsrezept und/oder Überweisung ohne persönlichen Arzt-Patienten-Kontakt. 01435 passt nicht, weil keine telefonische ärztliche Beratung wegen Erkrankung dokumentiert ist."
 }

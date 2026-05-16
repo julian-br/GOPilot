@@ -3,15 +3,15 @@
   "patient_id": "P002",
   "quartal": "2/2026",
   "already_billed_gops": [],
-  "scenario": "First contact this quarter — acute throat infection, young patient",
-  "dictation": "Frau Schmidt, 34 Jahre. Erstkontakt dieses Quartal. Seit 3 Tagen Halsschmerzen und Fieber 38,8 Grad. Körperliche Untersuchung: Rachen gerötet, Tonsillen vergrößert mit weißlichen Belägen. Schnelltest auf Streptokokken A durchgeführt: positiv. Penicillin V 1,2 Mio IE für 10 Tage verordnet. Krankschreibung 3 Tage ausgestellt.",
+  "scenario": "Erstkontakt akuter Infekt mit orientierendem Schnelltest",
+  "dictation": "Frau Schmidt, 34 Jahre. Erstkontakt dieses Quartal, persönlicher Arzt-Patienten-Kontakt. Seit drei Tagen Halsschmerzen und Fieber 38,8 Grad. Körperliche Untersuchung: Rachen gerötet, Tonsillen vergrößert mit weißlichen Belägen. Streptokokken-A-Schnelltest als orientierende Untersuchung mit visueller Auswertung eines vorgefertigten Reagenzträgers durchgeführt, positiv. Penicillin V verordnet, Arbeitsunfähigkeit bescheinigt.",
   "procedures": [
+    "Persönlicher Arzt-Patienten-Kontakt",
     "Körperliche Untersuchung",
-    "Streptokokken-Schnelltest (POCT)",
-    "Beratung",
-    "Rezeptausstellung",
+    "Orientierender Schnelltest mit Reagenzträger",
+    "Verordnung",
     "Arbeitsunfähigkeitsbescheinigung"
   ],
   "expected_gops": ["03000", "32030"],
-  "notes": "03000 Versichertenpauschale (Erstkontakt). 32030 für orientierende laboratoriumsmedizinische Untersuchung (Schnelltest). AU und Rezept im Verwaltungskomplex enthalten."
+  "notes": "03000 für den Erstkontakt im Quartal. 32030 passt zur orientierenden Untersuchung mit visueller Auswertung eines Reagenzträgers. 32152 ist nur bis zum vollendeten 16. Lebensjahr beschrieben und passt bei der 34-jährigen Patientin nicht."
 }

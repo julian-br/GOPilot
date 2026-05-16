@@ -1,0 +1,15 @@
+{
+  "case_id": "case_010",
+  "patient_id": "P003",
+  "quartal": "3/2026",
+  "already_billed_gops": [],
+  "scenario": "Erstkontakt chronisch kranke Patientin mit Spirographie",
+  "dictation": "Frau Weber, 78 Jahre. Erstkontakt im neuen Quartal in der Hausarztpraxis. Bekannte COPD und Hypertonie werden fortlaufend betreut, persönlicher Arzt-Patienten-Kontakt mit Beratung zur Inhalationstherapie. Spirographische Untersuchung durchgeführt: Darstellung der Flussvolumenkurve, in- und exspiratorische Messungen und graphische Registrierung.",
+  "procedures": [
+    "Persönlicher Arzt-Patienten-Kontakt",
+    "Chronikerbetreuung",
+    "Spirographische Untersuchung"
+  ],
+  "expected_gops": ["03000", "03220", "03330"],
+  "notes": "Neues Quartal ohne Vorabrechnung: 03000 und 03220 sind plausibel. 03330 ist durch die dokumentierte Spirographie erfüllt."
+}

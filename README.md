@@ -64,4 +64,12 @@ GOPilot/
 
 ### TODO
 
-Real test cases. In the best case we would use real (anomynized) medical data
+Real test cases. In the best case we would use real (anomynized) medical data, eventuell aus MFA schulungsdaten
+
+Maybe better embedding model: jina-embeddings-v3 oder BGE-M3
+
+BM25 (Keyword-Search) und Vector-Search mit Reranking
+
+Hypothetical Document Embeddings für bessere queries?
+
+erst zerlegen zu lassen: "Welche medizinischen Konzepte stecken in dieser Behandlung?

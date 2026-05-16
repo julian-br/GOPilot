@@ -3,14 +3,13 @@
   "patient_id": "P001",
   "quartal": "3/2026",
   "already_billed_gops": [],
-  "scenario": "First contact new quarter — chronic patient, all Pauschalen available again",
-  "dictation": "Herr Müller, 67 Jahre. Erstkontakt neues Quartal. Hypertonie stabil, Blutdruck 138/86 unter aktueller Medikation. Diabetes gut eingestellt, HbA1c 6,9%. Rezepte für Ramipril und Metformin ausgestellt. Langzeit-Blutdruckmessung angelegt, Patient gibt Gerät morgen ab.",
+  "scenario": "Erstkontakt neues Quartal beim chronisch kranken Hausarztpatienten mit ABDM",
+  "dictation": "Herr Müller, 67 Jahre. Erstkontakt im neuen Quartal in der Hausarztpraxis. Diabetes mellitus Typ 2 und arterielle Hypertonie werden weiter betreut, HbA1c 6,9 %. Persönlicher Arzt-Patienten-Kontakt mit Beratung zu Ernährung und Medikamenten. Langzeit-Blutdruckmessung mit automatisierter Aufzeichnung über mindestens 20 Stunden wurde ausgewertet; computergestützte Auswertung und Beurteilung des Befundes sind dokumentiert.",
   "procedures": [
-    "Blutdruckmessung",
-    "Langzeit-Blutdruckmessung (ABDM, 24h)",
-    "Beratung Hypertonie und Diabetes",
-    "Rezeptausstellung Dauermedikation"
+    "Persönlicher Arzt-Patienten-Kontakt",
+    "Chronikerbetreuung",
+    "Langzeit-Blutdruckmessung"
   ],
   "expected_gops": ["03000", "03220", "03324"],
-  "notes": "Neues Quartal: 03000 Versichertenpauschale und 03220 Chronikerzuschlag bei lebensverändernder chronischer Erkrankung wieder abrechenbar. 03030 ist keine Chronikerpauschale, sondern die Versichertenpauschale bei unvorhergesehener Inanspruchnahme zu Randzeiten. 03324 für ABDM/Langzeit-Blutdruckmessung."
+  "notes": "Neues Quartal ohne Vorabrechnung: 03000 Versichertenpauschale und 03220 Chronikerzuschlag sind plausibel. Die Langzeit-Blutdruckmessung ist mit mindestens 20 Stunden, computergestützter Auswertung und Befundbeurteilung dokumentiert und passt zu 03324."
 }

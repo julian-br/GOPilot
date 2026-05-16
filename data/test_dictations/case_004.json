@@ -3,11 +3,11 @@
   "patient_id": "P002",
   "quartal": "2/2026",
   "already_billed_gops": ["03000"],
-  "scenario": "Follow-up same quarter — short control visit, no new billable procedures",
-  "dictation": "Frau Schmidt, 34 Jahre. Kontrolltermin nach Angina. Symptome vollständig abgeklungen, Rachen reizlos, kein Fieber mehr. Keine weiteren Beschwerden. Patientin arbeitsfähig, keine weiteren Maßnahmen nötig.",
+  "scenario": "Kurzer Verlaufskontrolltermin im selben Quartal ohne neue abrechenbare Leistung",
+  "dictation": "Frau Schmidt, 34 Jahre. Kurzer persönlicher Kontrolltermin nach Angina. Beschwerden vollständig abgeklungen, Rachen reizlos, kein Fieber. Keine Laboruntersuchung, keine Prozedur, keine Verordnung und keine Bescheinigung. Patientin ist arbeitsfähig.",
   "procedures": [
-    "Körperliche Kurzuntersuchung (Rachen)"
+    "Kurze Verlaufskontrolle"
   ],
   "expected_gops": [],
-  "notes": "03000 bereits abgerechnet dieses Quartal. Kurze Kontrolle ohne zusätzliche abrechenbare Leistung — korrekte Antwort ist eine leere GOP-Liste."
+  "notes": "03000 ist in diesem Quartal bereits abgerechnet. Es ist keine zusätzliche Leistung wie Labor, Gespräch mindestens 10 Minuten, Prozedur oder Bescheinigung dokumentiert."
 }

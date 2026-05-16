@@ -1,18 +1,14 @@
 {
   "case_id": "case_006",
-  "patient_id": "P001",
+  "patient_id": "P003",
   "quartal": "2/2026",
-  "already_billed_gops": ["03000", "03220"],
-  "scenario": "Complex visit — multiple billable procedures, new cardiac finding",
-  "dictation": "Herr Müller, 67 Jahre. Notfallkonsultation wegen akuter Kurzatmigkeit und beidseitiger Unterschenkelödeme seit gestern. Körperliche Untersuchung: RR 168/98, Herzfrequenz 112 unregelmäßig. Lungenfunktion gemessen: FEV1/FVC 0,61, Hinweis auf obstruktive Ventilationsstörung. EKG: tachykardes Vorhofflimmern, neu aufgetreten. Infusion Furosemid 40mg i.v. über 20 Minuten angelegt. Patient stabilisiert. Stationäre Einweisung in Kardiologie ausgestellt.",
+  "already_billed_gops": ["03000"],
+  "scenario": "Komplexer Hausarztbesuch mit Spirometrie und intravenöser Infusion",
+  "dictation": "Frau Weber, 78 Jahre. Persönlicher Hausarzttermin wegen akuter Verschlechterung der Luftnot bei bekannter COPD. Die Versichertenpauschale ist in diesem Quartal bereits abgerechnet. Körperliche Untersuchung mit RR 168/98 und Herzfrequenz 112. Spirographische Untersuchung durchgeführt mit Darstellung der Flussvolumenkurve, in- und exspiratorischen Messungen und graphischer Registrierung; FEV1/FVC 0,61. Zusätzlich Infusion Furosemid 40 mg intravenös über 20 Minuten angelegt, Patientin stabilisiert.",
   "procedures": [
-    "Körperliche Untersuchung",
-    "Blutdruckmessung",
-    "Lungenfunktionsmessung (Spirometrie)",
-    "EKG-Ableitung (Ruhe-EKG)",
-    "Intravenöse Infusion (Furosemid 40mg, über 20 Minuten)",
-    "Stationäre Einweisung"
+    "Spirographische Untersuchung",
+    "Intravenöse Infusion"
   ],
   "expected_gops": ["03330", "02100"],
-  "notes": "03330 für Spirographie/Spirometrie. 02100 für i.v.-Infusion, da die Mindestdauer von 10 Minuten dokumentiert ist. Das dokumentierte EKG ist ein Ruhe-EKG und keine Belastungs-EKG-GOP 03321. 01430 passt nicht zur stationären Einweisung im persönlichen Kontakt. 03000/03220 bereits in diesem Quartal abgerechnet."
+  "notes": "03000 ist bereits abgerechnet. 03330 ist durch Flussvolumenkurve, in-/exspiratorische Messungen und Registrierung dokumentiert. 02100 ist durch intravenöse Infusion dokumentiert."
 }

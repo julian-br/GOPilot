@@ -49,7 +49,11 @@ def setup_db() -> None:
     init_db()
     seed_db()
     print("  DB ready at data/gopilot.db")
-    print("  Mock patients: P001 Müller (67, Chroniker), P002 Schmidt (34), P003 Wagner (8, Kind)")
+    print(
+        "  Mock patients: P001 Müller (67, Diabetes/Hypertonie), "
+        "P002 Schmidt (34, akut), P003 Weber (78, COPD/Herzinsuffizienz), "
+        "P004 Becker (50), P005 Kaya (41, Asthma)"
+    )
 
 
 def setup_vectordb() -> None:

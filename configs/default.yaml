@@ -2,6 +2,8 @@ experiment: default
 model: qwen3.5:9b
 top_k: 10
 thinking: false
+practice_fachgruppe: Hausärztlicher Versorgungsbereich
+reranker_model: BAAI/bge-reranker-v2-m3
 conditions:
   - basic
   - rag

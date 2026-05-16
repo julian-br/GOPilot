@@ -1,0 +1,13 @@
+{
+  "case_id": "case_008",
+  "patient_id": "P005",
+  "quartal": "2/2026",
+  "already_billed_gops": [],
+  "scenario": "Telefonische ärztliche Beratung ohne persönlichen Kontakt",
+  "dictation": "Frau Kaya, 41 Jahre. Patientin ruft wegen akutem Durchfall und Übelkeit an. Kein persönlicher Arzt-Patienten-Kontakt in der Praxis. Ärztliche telefonische Beratung im Zusammenhang mit der Erkrankung, Trinkmenge, Warnzeichen und Wiedervorstellung besprochen. Dauer der telefonischen Beratung 8 Minuten.",
+  "procedures": [
+    "Telefonische ärztliche Beratung wegen Erkrankung"
+  ],
+  "expected_gops": ["01435"],
+  "notes": "01435 beschreibt telefonische Beratung im Zusammenhang mit einer Erkrankung bzw. mittelbaren Arzt-Patienten-Kontakt. 03000 ist nicht dokumentiert, weil kein persönlicher Kontakt oder Videosprechstundenkontakt vorliegt."
+}

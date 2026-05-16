@@ -1,0 +1,14 @@
+{
+  "case_id": "case_007",
+  "patient_id": "P004",
+  "quartal": "3/2026",
+  "already_billed_gops": [],
+  "scenario": "Erstkontakt mit primärer Wundversorgung mittels Naht",
+  "dictation": "Herr Becker, 50 Jahre. Erstkontakt im Quartal, persönlicher Arzt-Patienten-Kontakt nach Schnittverletzung am linken Unterarm. Wunde gereinigt, desinfiziert und primäre Wundversorgung mittels drei Einzelknopfnähten durchgeführt. Tetanusstatus geprüft, Verband angelegt.",
+  "procedures": [
+    "Persönlicher Arzt-Patienten-Kontakt",
+    "Primäre Wundversorgung mittels Naht"
+  ],
+  "expected_gops": ["03000", "02301"],
+  "notes": "03000 für den Erstkontakt im Quartal. 02301 beschreibt primäre Wundversorgung mittels Naht."
+}

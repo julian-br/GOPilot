@@ -1,0 +1,13 @@
+{
+  "case_id": "case_009",
+  "patient_id": "P004",
+  "quartal": "2/2026",
+  "already_billed_gops": ["03000"],
+  "scenario": "Problemorientiertes ärztliches Gespräch von mindestens 10 Minuten",
+  "dictation": "Herr Becker, 50 Jahre. Persönlicher Termin wegen neu diagnostizierter schwerer Schlafstörung nach Arbeitsplatzverlust. Die Versichertenpauschale ist in diesem Quartal bereits abgerechnet. Problemorientiertes ärztliches Gespräch aufgrund von Art und Schwere der Erkrankung, Dauer 15 Minuten, Beratung zu Therapieoptionen und Verlauf. Keine weitere Prozedur.",
+  "procedures": [
+    "Problemorientiertes ärztliches Gespräch mindestens 10 Minuten"
+  ],
+  "expected_gops": ["03230"],
+  "notes": "03230 ist durch problemorientiertes ärztliches Gespräch mit mindestens 10 Minuten Dauer dokumentiert. 03000 ist bereits abgerechnet."
+}

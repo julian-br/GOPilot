@@ -3,14 +3,14 @@
   "patient_id": "P001",
   "quartal": "2/2026",
   "already_billed_gops": ["03000", "03220"],
-  "scenario": "Routine follow-up chronic patient — Pauschalen already billed this quarter",
-  "dictation": "Herr Müller, 67 Jahre. Kontrolltermin wegen Hypertonie und Diabetes Typ 2. Blutdruck heute 152/94, leicht erhöht. Ramipril von 5mg auf 10mg erhöht, Rezept ausgestellt. Blutzucker nüchtern 138 mg/dl. EKG abgeleitet, Sinusrhythmus, keine Auffälligkeiten. Überweisung zum Diabetologen ausgestellt.",
+  "scenario": "Hausarzt-Folgekontakt Chroniker im selben Quartal mit Therapieanpassung",
+  "dictation": "Herr Müller, 67 Jahre, persönlicher Kontrolltermin wegen Diabetes Typ 2 und Hypertonie. Es ist der zweite persönliche Arzt-Patienten-Kontakt in diesem Quartal. Blutdruck heute 152/94, Ramipril von 5 mg auf 10 mg erhöht. Blutzucker nüchtern 138 mg/dl, Diabetestagebuch besprochen. Rezept ausgestellt.",
   "procedures": [
-    "Blutdruckmessung",
-    "EKG-Ableitung (Ruhe-EKG)",
-    "Rezeptausstellung",
-    "Überweisung"
+    "Persönlicher Folgekontakt",
+    "Chronikerbetreuung",
+    "Therapieanpassung bei chronischer Erkrankung",
+    "Rezeptausstellung"
   ],
   "expected_gops": ["03221"],
-  "notes": "03000 und 03220 bereits abgerechnet dieses Quartal. 03221 ist als Zuschlag zur 03220 bei mindestens zwei persönlichen Arzt-Patienten-Kontakten und Therapieanpassung plausibel. Das dokumentierte EKG ist ein Ruhe-EKG und keine Belastungs-EKG-GOP 03321. 01430 gilt für Überweisung/Wiederholungsrezept ohne persönlichen Arzt-Patienten-Kontakt und passt hier nicht."
+  "notes": "03000 und 03220 sind laut Quartalskontext bereits abgerechnet. 03221 ist der Zuschlag zu 03220 bei mindestens zwei persönlichen Arzt-Patienten-Kontakten und Überprüfung/Anpassung der leitliniengestützten Behandlung. Rezept ist im persönlichen Kontakt nicht als 01430 abzurechnen."
 }
