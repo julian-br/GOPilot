@@ -103,6 +103,8 @@ def run_condition(
     cfg: EvalConfig,
 ) -> dict:
     dictation = case["dictation"]
+    already_billed: set[str] = set(case.get("already_billed_gops") or [])
+
     if condition == "agent":
         result = run_agent(
             dictation=dictation,
@@ -115,7 +117,7 @@ def run_condition(
             already_billed_gops=case.get("already_billed_gops"),
         )
         raw = result["response"]
-        predicted = parse_gops(raw)
+        predicted = [g for g in parse_gops(raw) if g not in already_billed]
         return {
             "predicted": predicted,
             "raw_response": raw,
@@ -136,7 +138,7 @@ def run_condition(
     )
     gop_ctx = retrieve_gops(col, dictation, cfg.top_k) if condition == "rag" else None
     raw = ask_llm(build_prompt(dictation, patient_ctx, gop_ctx), model=cfg.model, think=cfg.thinking)
-    predicted = parse_gops(raw)
+    predicted = [g for g in parse_gops(raw) if g not in already_billed]
     return {
         "predicted": predicted,
         "raw_response": raw,

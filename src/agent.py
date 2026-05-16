@@ -218,9 +218,8 @@ def _reciprocal_rank_fusion(
 
     def sort_key(gop: str) -> tuple:
         hit = merged[gop]
-        fachgruppe_bonus = 0.001 if preferred_fachgruppe and hit.get("fachgruppe") == preferred_fachgruppe else 0.0
         return (
-            -(scores[gop] + fachgruppe_bonus),
+            -scores[gop],
             hit.get("semantic_rank") or 9999,
             hit.get("bm25_rank") or 9999,
             gop,
@@ -944,7 +943,7 @@ def _decide_from_candidates(
         )
     except ollama.ResponseError:
         return "[]"
-    return _filter_decision_response((response.message.content or "").strip(), allowed_gops)
+    return (response.message.content or "").strip()
 
 
 def _candidate_for_prompt(candidate: dict) -> dict:
