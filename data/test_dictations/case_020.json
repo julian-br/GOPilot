@@ -1,0 +1,14 @@
+{
+  "case_id": "case_020",
+  "patient_id": "P003",
+  "quartal": "4/2026",
+  "already_billed_gops": ["03000", "03220"],
+  "scenario": "Hausbesuch im Folgekontakt mit intravenöser Infusion bei Herzinsuffizienz",
+  "dictation": "Frau Weber, 78 Jahre. Zweiter Kontakt im Quartal, Versichertenpauschale und Chronikerpauschale sind bereits abgerechnet. Hausbesuch in der eigenen Häuslichkeit auf Anforderung des Pflegedienstes wegen akuter Luftnotverschlechterung. Persönlicher Arzt-Patienten-Kontakt. Körperliche Untersuchung: deutliche Dyspnoe, Sauerstoffsättigung 91 %, Beinödeme beidseits zugenommen, Blutdruck 172/102. Furosemid 40 mg intravenöse Infusion über 20 Minuten verabreicht, Patientin klinisch gebessert, Sauerstoffsättigung 95 %. Engmaschige Kontrolle vereinbart.",
+  "procedures": [
+    "Hausbesuch in der Häuslichkeit",
+    "Intravenöse Infusion"
+  ],
+  "expected_gops": ["01410", "02100"],
+  "notes": "01410 für den Hausbesuch in der eigenen Häuslichkeit; auch beim zweiten Kontakt im Quartal abrechenbar, da es sich um einen eigenständigen Hausbesuch handelt. 02100 für die intravenöse Infusion über 20 Minuten. 03000 und 03220 sind bereits abgerechnet."
+}

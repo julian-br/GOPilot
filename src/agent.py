@@ -487,13 +487,27 @@ def run_agent(
     except ollama.ResponseError as e:
         return {"response": "[]", "steps": 1, "tool_log": tool_log, "search_plan": [], "error": str(e)}
 
+    try:
+        search_terms = build_search_plan(
+            dictation=dictation,
+            patient_id=patient_id,
+            quartal=quartal,
+            patient_context=patient_ctx,
+            practice_fachgruppe=practice_fachgruppe,
+            model=model,
+            think=think,
+        )
+    except ollama.ResponseError:
+        search_terms = []
+
     search_queries = [
-        {"label": "hyde_document", "query": hypothetical_document},
-        {"label": "dictation", "query": dictation},
+        {"label": "hyde_document", "query": hypothetical_document, "n_results": 16},
+        {"label": "dictation", "query": dictation, "n_results": 16},
+        *[{"label": term, "query": term, "n_results": 8} for term in search_terms[:6]],
     ]
     candidates: dict[str, dict] = {}
     for item in search_queries:
-        search_args = {"query": item["query"], "n_results": 16, "preferred_fachgruppe": practice_fachgruppe}
+        search_args = {"query": item["query"], "n_results": item.get("n_results", 8), "preferred_fachgruppe": practice_fachgruppe}
         hits = _call_tool(search_gops, search_args)
         tool_log.append({"tool": "search_gops", "args": search_args, "result": hits})
         if not isinstance(hits, list):
@@ -562,7 +576,7 @@ def run_agent(
         quartal=quartal,
         patient_ctx=patient_ctx,
         practice_fachgruppe=practice_fachgruppe,
-        search_plan=[hypothetical_document],
+        search_plan=search_terms,
         candidates=[candidates[gop] for gop in ranked_codes[:24]],
         think=think,
     )
@@ -570,7 +584,7 @@ def run_agent(
         "response": response,
         "steps": 2,
         "tool_log": tool_log,
-        "search_plan": [hypothetical_document],
+        "search_plan": search_terms,
         "hypothetical_document": hypothetical_document,
         "reranker": rerank_log,
     }
@@ -623,6 +637,13 @@ def _inject_pauschal_candidates(
             }
 
 
+def _is_pauschal_injected(candidate: dict) -> bool:
+    return any(
+        t in ("pauschal_erstkontakt", "pauschal_chroniker")
+        for t in candidate.get("source_terms", [])
+    )
+
+
 def _rank_candidate_codes(
     candidates: dict[str, dict],
     preferred_fachgruppe: str | None = None,
@@ -633,6 +654,7 @@ def _rank_candidate_codes(
         candidates,
         key=lambda gop: (
             gop in (already_billed_gops or set()),
+            not _is_pauschal_injected(candidates[gop]),
             -float(candidates[gop].get("rerank_score", -999.0)),
             _fachgruppe_priority(candidates[gop], preferred_fachgruppe),
             _unsupported_special_context_penalty(candidates[gop]),

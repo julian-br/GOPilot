@@ -1,0 +1,14 @@
+{
+  "case_id": "case_011",
+  "patient_id": "P001",
+  "quartal": "4/2026",
+  "already_billed_gops": [],
+  "scenario": "Erstkontakt neues Quartal mit Belastungs-EKG zur Belastungstoleranzprüfung",
+  "dictation": "Herr Müller, 67 Jahre. Erstkontakt im neuen Quartal, persönlicher Arzt-Patienten-Kontakt. Diabetes mellitus Typ 2 und arterielle Hypertonie werden weiter betreut. Patient berichtet über Belastungsdyspnoe beim Treppensteigen. Belastungs-Elektrokardiographie am Ergometer durchgeführt: Untersuchung in Ruhe und unter definierter Stufenbelastung, mindestens 12 Ableitungen in Ruhe sowie mindestens 3 Ableitungen während der Belastung, fortlaufende Kontrolle des Kurvenverlaufes, wiederholte Blutdruckmessung. Abbruchkriterien nicht erreicht, keine Ischämiezeichen unter Belastung.",
+  "procedures": [
+    "Persönlicher Arzt-Patienten-Kontakt",
+    "Belastungs-EKG am Ergometer"
+  ],
+  "expected_gops": ["03000", "03220", "03321"],
+  "notes": "03000 für den Erstkontakt im Quartal. 03220 wegen Diabetes mellitus Typ 2 und arterieller Hypertonie (mindestens 2 Dauerdiagnosen). 03321 für die Belastungs-Elektrokardiographie: dokumentiert mit Ergometerbelastung, Ruhe- und Belastungsableitungen, fortlaufender Kurvenkontrolle und wiederholter Blutdruckmessung. Ein einfaches Ruhe-EKG wäre im Hausarzt-Kontext nicht gesondert abrechenbar."
+}

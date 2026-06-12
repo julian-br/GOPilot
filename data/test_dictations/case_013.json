@@ -1,0 +1,15 @@
+{
+  "case_id": "case_013",
+  "patient_id": "P005",
+  "quartal": "3/2026",
+  "already_billed_gops": [],
+  "scenario": "Erstkontakt Asthma-Patientin mit Spirographie inkl. Chronikerpauschale",
+  "dictation": "Frau Kaya, 41 Jahre. Erstkontakt im Quartal, persönlicher Arzt-Patienten-Kontakt. Bekanntes Asthma bronchiale als lebensverändernde chronische Erkrankung; Patientin klagt über zunehmende Belastungsdyspnoe seit zwei Wochen. Spirographische Untersuchung durchgeführt: Darstellung der Flussvolumenkurve, in- und exspiratorische Messungen mit graphischer Registrierung; FEV1/FVC 0,72, FVC 94 % des Sollwerts. Inhalationstherapie optimiert, neues LABA-Präparat verordnet.",
+  "procedures": [
+    "Persönlicher Arzt-Patienten-Kontakt",
+    "Chronikerbetreuung Asthma bronchiale",
+    "Spirographische Untersuchung"
+  ],
+  "expected_gops": ["03000", "03220", "03330"],
+  "notes": "03000 für den Erstkontakt im Quartal. 03220 für die Behandlung und Betreuung eines Patienten mit mindestens einer lebensverändernden chronischen Erkrankung: Asthma bronchiale qualifiziert als solche. 03330 durch Spirographie mit Flussvolumenkurve, in-/exspiratorischen Messungen und graphischer Registrierung dokumentiert. Kein 02500 (Einzelinhalationstherapie), da nur Beratung zur Inhalation stattfand, keine Inhalationsbehandlung in der Praxis."
+}

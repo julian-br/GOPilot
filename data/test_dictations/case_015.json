@@ -1,0 +1,15 @@
+{
+  "case_id": "case_015",
+  "patient_id": "P001",
+  "quartal": "4/2026",
+  "already_billed_gops": ["03000", "03220"],
+  "scenario": "Zweiter Chroniker-Folgekontakt mit problemorientiertem Gespräch bei Polyneuropathie",
+  "dictation": "Herr Müller, 67 Jahre. Zweiter persönlicher Arzt-Patienten-Kontakt im Quartal, Versichertenpauschale und Chronikerpauschale sind bereits abgerechnet. Anlass: neu aufgetretene Taubheitsgefühle und Kribbeln in beiden Füßen. Problemorientiertes ärztliches Gespräch aufgrund der Art und Schwere der Erkrankung, Dauer 12 Minuten: Erörterung einer Polyneuropathie als mögliche Metformin-Nebenwirkung, Diskussion von Therapiealternativen und Stellenwert der Vitamin-B12-Substitution. Metformin von 2000 auf 500 mg täglich reduziert, Vitamin-B12-Substitution verordnet. Therapieanpassung und Überprüfung der leitliniengestützten Dauermedikation dokumentiert.",
+  "procedures": [
+    "Zweiter persönlicher Arzt-Patienten-Kontakt",
+    "Problemorientiertes ärztliches Gespräch mindestens 10 Minuten",
+    "Therapieanpassung bei Dauererkrankung"
+  ],
+  "expected_gops": ["03221", "03230"],
+  "notes": "03221 als Zuschlag zu 03220 beim zweiten persönlichen Arzt-Patienten-Kontakt im Quartal mit Überprüfung und Anpassung der leitliniengestützten Dauermedikation. 03230 für das problemorientierte ärztliche Gespräch von 12 Minuten. Beide Codes sind kombinierbar. 03000 und 03220 sind bereits abgerechnet."
+}

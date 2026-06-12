@@ -27,6 +27,8 @@ SEED_PATIENTS = [
     ("P003", "Weber, Erika", 1948, "F", "Barmer", "COPD; Herzinsuffizienz; arterielle Hypertonie"),
     ("P004", "Becker, Thomas", 1976, "M", "DAK-Gesundheit", ""),
     ("P005", "Kaya, Leyla", 1985, "F", "AOK Nordost", "Asthma bronchiale"),
+    ("P006", "Sommer, Karl", 1948, "M", "KNAPPSCHAFT", "Herzrhythmusstörungen; koronare Herzkrankheit"),
+    ("P007", "Fischer, Marie", 2005, "F", "BKK Freudenberg", ""),
 ]
 
 # GOPs already billed in Q2/2026 for realistic same-quarter follow-up contexts.

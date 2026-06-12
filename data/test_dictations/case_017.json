@@ -1,0 +1,14 @@
+{
+  "case_id": "case_017",
+  "patient_id": "P005",
+  "quartal": "3/2026",
+  "already_billed_gops": ["03000", "03220"],
+  "scenario": "Telefonische Beratung und Wiederholungsrezept ohne persönlichen Kontakt an einem Tag",
+  "dictation": "Frau Kaya, 41 Jahre. Kein persönlicher Arzt-Patienten-Kontakt in der Praxis. Patientin ruft wegen akuter Verschlechterung des Asthmas an; ärztliche telefonische Beratung im Zusammenhang mit der Erkrankung, Dauer 7 Minuten: Symptombewertung, Empfehlung zur Steigerung der Bedarfsmedikation und Besprechung von Warnzeichen für eine Notaufnahme. Auf ausdrücklichen Wunsch der Patientin wird anschließend ohne weiteren persönlichen Kontakt ein Wiederholungsrezept für Salbutamol-Dosieraerosol ausgestellt.",
+  "procedures": [
+    "Telefonische ärztliche Beratung wegen Erkrankung",
+    "Wiederholungsrezept ohne persönlichen Kontakt"
+  ],
+  "expected_gops": ["01435", "01430"],
+  "notes": "01435 für die telefonische ärztliche Beratung im Zusammenhang mit der Erkrankung (einmal im Behandlungsfall abrechenbar, noch nicht verbraucht). 01430 für das Wiederholungsrezept ohne persönlichen Arzt-Patienten-Kontakt. Beide GOPs sind kombinierbar, da unterschiedliche Leistungen (Beratungsleistung vs. Verwaltungsleistung). 03000 und 03220 sind bereits in diesem Quartal abgerechnet, da Asthma bronchiale als lebensverändernde chronische Erkrankung für 03220 qualifiziert."
+}

@@ -1,0 +1,15 @@
+{
+  "case_id": "case_018",
+  "patient_id": "P001",
+  "quartal": "4/2026",
+  "already_billed_gops": ["03000", "03220"],
+  "scenario": "Zweiter Chroniker-Folgekontakt mit Belastungs-EKG zur Verlaufskontrolle nach Metoprolol-Einstellung",
+  "dictation": "Herr Müller, 67 Jahre. Zweiter persönlicher Arzt-Patienten-Kontakt im Quartal, Versichertenpauschale und Chronikerpauschale sind bereits abgerechnet. Kontrolle nach Metoprolol-Neueinstellung wegen Belastungsdyspnoe. Belastungs-Elektrokardiographie am Ergometer: Untersuchung in Ruhe und unter Stufenbelastung, mindestens 12 Ableitungen in Ruhe, mindestens 3 Ableitungen unter Belastung, fortlaufende Kontrolle des Kurvenverlaufes, wiederholte Blutdruckmessung; keine Ischämiezeichen, Herzfrequenz unter Belastung jetzt adäquat begrenzt. Metoprolol 25 mg beibehalten; Überprüfung der leitliniengestützten Dauermedikation dokumentiert.",
+  "procedures": [
+    "Zweiter persönlicher Arzt-Patienten-Kontakt",
+    "Belastungs-EKG am Ergometer zur Verlaufskontrolle",
+    "Überprüfung der Dauermedikation"
+  ],
+  "expected_gops": ["03221", "03321"],
+  "notes": "03221 als Zuschlag beim zweiten persönlichen Arzt-Patienten-Kontakt im Quartal mit Überprüfung der leitliniengestützten Dauermedikation (Metoprolol beibehalten nach Evaluation). 03321 für die Belastungs-Elektrokardiographie am Ergometer mit vollständiger Dokumentation. 03000 und 03220 sind bereits abgerechnet."
+}

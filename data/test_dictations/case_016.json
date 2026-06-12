@@ -1,0 +1,15 @@
+{
+  "case_id": "case_016",
+  "patient_id": "P006",
+  "quartal": "3/2026",
+  "already_billed_gops": [],
+  "scenario": "Erstkontakt neuer Patient mit Langzeit-EKG: Aufzeichnung und computergestützte Auswertung",
+  "dictation": "Herr Sommer, 78 Jahre. Erstkontakt in der Hausarztpraxis, persönlicher Arzt-Patienten-Kontakt. Bekannte Herzrhythmusstörungen und koronare Herzkrankheit. Patient klagt über gelegentliches Herzstolpern in Ruhe. Genehmigung der KV zur Durchführung langzeitelektrokardiographischer Untersuchungen liegt vor. Langzeit-EKG-Gerät angelegt und eingestellt, Aufzeichnungsstart; Aufzeichnungsdauer 24 Stunden. Patient gibt das Gerät am nächsten Tag zurück; computergestützte Auswertung des kontinuierlich aufgezeichneten Langzeit-EKG von mehr als 18 Stunden Dauer und Befundbeurteilung durchgeführt: vereinzelte supraventrikuläre Extrasystolen, keine signifikanten tachykarden oder bradykarden Episoden.",
+  "procedures": [
+    "Persönlicher Arzt-Patienten-Kontakt",
+    "Langzeit-EKG-Aufzeichnung (mindestens 18 Stunden)",
+    "Computergestützte Auswertung des Langzeit-EKG"
+  ],
+  "expected_gops": ["03000", "03220", "03322", "03241"],
+  "notes": "03000 für den Erstkontakt im Quartal. 03220 wegen Herzrhythmusstörungen und koronarer Herzkrankheit (mindestens 2 Dauerdiagnosen). 03322 für die Langzeit-EKG-Aufzeichnung von mindestens 18 Stunden (KV-Genehmigung liegt vor). 03241 für die computergestützte Auswertung des kontinuierlich aufgezeichneten Langzeit-EKG von mindestens 18 Stunden Dauer; diese ist eine eigenständige GOP zusätzlich zur Aufzeichnung."
+}

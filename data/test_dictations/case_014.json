@@ -1,0 +1,14 @@
+{
+  "case_id": "case_014",
+  "patient_id": "P007",
+  "quartal": "3/2026",
+  "already_billed_gops": [],
+  "scenario": "Erstkontakt junge Patientin mit Wundversorgung ohne Naht nach Fahrradunfall",
+  "dictation": "Frau Fischer, 21 Jahre. Erstkontakt nach Fahrradunfall, persönlicher Arzt-Patienten-Kontakt. Keine chronischen Erkrankungen bekannt. Schürfwunde am linken Knie, ca. 4 cm², mit oberflächlichen Schmutzeinlagerungen. Wunde sorgfältig gereinigt und desinfiziert, Wundversorgung ohne Naht durchgeführt. Sterile Wundauflage und Verband angelegt. Tetanusstatus aktuell.",
+  "procedures": [
+    "Persönlicher Arzt-Patienten-Kontakt",
+    "Wundversorgung ohne Naht"
+  ],
+  "expected_gops": ["03000", "02300"],
+  "notes": "03000 für den Erstkontakt im Quartal. 02300 für die Wundversorgung ohne Naht. Keine 03220, da Frau Fischer keine chronischen Erkrankungen hat."
+}

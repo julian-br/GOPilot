@@ -1,0 +1,13 @@
+{
+  "case_id": "case_019",
+  "patient_id": "P002",
+  "quartal": "3/2026",
+  "already_billed_gops": ["03000"],
+  "scenario": "Kurzvisite ohne abrechenbare Leistung nach Infektbehandlung",
+  "dictation": "Frau Schmidt, 34 Jahre. Kurzer persönlicher Folgetermin nach Antibiotikatherapie wegen Angina lacunaris. Versichertenpauschale ist in diesem Quartal bereits abgerechnet. Beschwerden vollständig abgeklungen, Rachen reizlos, Lymphknoten nicht mehr tastbar, kein Fieber. Blutdruck 116/72. Keine Laboruntersuchung, keine Prozedur, keine Verordnung, keine Arbeitsunfähigkeitsbescheinigung. Patientin arbeitsfähig, kein weiterer Handlungsbedarf.",
+  "procedures": [
+    "Kurze Verlaufskontrolle"
+  ],
+  "expected_gops": [],
+  "notes": "03000 ist in diesem Quartal bereits abgerechnet. Es sind keine weiteren abrechenbaren Leistungen dokumentiert: keine Laboruntersuchung, kein Gespräch von mindestens 10 Minuten, keine Prozedur, keine Verordnung und keine Bescheinigung. Die Blutdruckmessung ist eine einfache Messung und keine eigenständig abrechenbare Leistung im Hausarzt-Kontext."
+}
