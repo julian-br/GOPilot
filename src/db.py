@@ -51,13 +51,6 @@ def get_connection() -> sqlite3.Connection:
 def init_db() -> None:
     with get_connection() as conn:
         conn.executescript(SCHEMA)
-        _ensure_columns(conn)
-
-
-def _ensure_columns(conn: sqlite3.Connection) -> None:
-    columns = {row["name"] for row in conn.execute("PRAGMA table_info(patients)").fetchall()}
-    if "conditions" not in columns:
-        conn.execute("ALTER TABLE patients ADD COLUMN conditions TEXT NOT NULL DEFAULT ''")
 
 
 def seed_db() -> None:

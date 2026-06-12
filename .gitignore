@@ -49,3 +49,5 @@ logs/
 
 # Eval reports (generated, not versioned)
 reports/
+
+.claude

@@ -99,9 +99,19 @@ _GOP_FACHGRUPPE: dict[str, tuple[str, str]] = {
 # (prefixed with "- ") contain the actual service content and are useful for embeddings.
 _BODY_STOP = re.compile(
     r"^(Abrechnungsbestimmung|Anmerkung|Berichtspflicht|"
-    r"Die Geb.hrenordnung|Aufwand|Kalkulationszeit|Pr.fzeit|Stand )",
+    r"Die Geb.hrenordnung|Die Berechnung|Aufwand|Kalkulationszeit|Pr.fzeit|Stand )",
     re.IGNORECASE,
 )
+
+# Full normative text (stored as metadata, not embedded): keep Abrechnungsbestimmungen
+# and Anmerkungen ("nicht neben ..."), stop only at the calculation/audit tail.
+_VOLLTEXT_STOP = re.compile(
+    r"^(Aufwand|Kalkulationszeit|Pr.fzeit|Eignung d. Pr.fzeit|Berichtspflicht)",
+    re.IGNORECASE,
+)
+# Page furniture interleaved at page breaks — skip inside volltext.
+_PAGE_NOISE = re.compile(r"^(Stand \d|KBV$|Kassen.rztliche Bundesvereinigung)")
+_VOLLTEXT_MAX_CHARS = 1600
 
 
 @dataclass
@@ -113,6 +123,7 @@ class GOPEntry:
     fachgruppe: str = ""
     ausschluesse: list[str] = field(default_factory=list)
     body: str = ""  # first meaningful content lines, used to enrich embedding
+    volltext: str = ""  # full normative text incl. Abrechnungsbestimmungen/Anmerkungen
     primary_match: bool = False  # True if matched by euro-anchored regex (more reliable)
 
     def to_document(self) -> str:
@@ -136,6 +147,7 @@ class GOPEntry:
             "kapitel": self.kapitel,
             "fachgruppe": self.fachgruppe,
             "ausschluesse": json.dumps(self.ausschluesse),
+            "volltext": self.volltext,
         }
 
 
@@ -162,12 +174,31 @@ def _extract_exclusions(block_text: str) -> list[str]:
     return list(dict.fromkeys(exclusions))  # deduplicate, preserve order
 
 
+def _finalize_entry(
+    current: GOPEntry,
+    current_body: list[str],
+    current_body_content: list[str],
+    current_volltext: list[str],
+) -> GOPEntry:
+    body = "\n".join(current_body)
+    if current.punkte == 0:
+        pm = _PUNKTE.search(body)
+        if pm:
+            current.punkte = int(pm.group(1))
+    current.ausschluesse = _extract_exclusions(body)
+    current.body = " ".join(current_body_content[:8])[:400]
+    current.volltext = " ".join([f"GOP {current.gop}: {current.description}.", *current_volltext])[:_VOLLTEXT_MAX_CHARS]
+    return current
+
+
 def parse_pdf(pdf_path: Path) -> list[GOPEntry]:
     entries: list[GOPEntry] = []
     current: GOPEntry | None = None
     current_body: list[str] = []
     current_body_content: list[str] = []  # lines before _BODY_STOP, for body enrichment
+    current_volltext: list[str] = []  # lines before _VOLLTEXT_STOP, incl. Anmerkungen
     body_stopped = False
+    volltext_stopped = False
 
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
@@ -194,14 +225,7 @@ def parse_pdf(pdf_path: Path) -> list[GOPEntry]:
                 if gop_m:
                     # Save previous entry
                     if current is not None:
-                        body = "\n".join(current_body)
-                        if current.punkte == 0:
-                            pm = _PUNKTE.search(body)
-                            if pm:
-                                current.punkte = int(pm.group(1))
-                        current.ausschluesse = _extract_exclusions(body)
-                        current.body = " ".join(current_body_content[:8])[:400]
-                        entries.append(current)
+                        entries.append(_finalize_entry(current, current_body, current_body_content, current_volltext))
 
                     gop_code = gop_m.group(1)
                     kapitel, fachgruppe = _GOP_FACHGRUPPE.get(gop_code[:2], ("", ""))
@@ -214,7 +238,9 @@ def parse_pdf(pdf_path: Path) -> list[GOPEntry]:
                     )
                     current_body = []
                     current_body_content = []
+                    current_volltext = []
                     body_stopped = False
+                    volltext_stopped = False
                     continue
 
                 if current is None:
@@ -228,6 +254,12 @@ def parse_pdf(pdf_path: Path) -> list[GOPEntry]:
                     else:
                         current_body_content.append(stripped)
 
+                if not volltext_stopped and not _PAGE_NOISE.match(stripped):
+                    if _VOLLTEXT_STOP.match(stripped):
+                        volltext_stopped = True
+                    else:
+                        current_volltext.append(stripped)
+
                 # Punkte often on line immediately after GOP header
                 if current.punkte == 0:
                     pm = _PUNKTE.search(stripped)
@@ -236,14 +268,7 @@ def parse_pdf(pdf_path: Path) -> list[GOPEntry]:
 
     # Flush last entry
     if current is not None:
-        body = "\n".join(current_body)
-        if current.punkte == 0:
-            pm = _PUNKTE.search(body)
-            if pm:
-                current.punkte = int(pm.group(1))
-        current.ausschluesse = _extract_exclusions(body)
-        current.body = " ".join(current_body_content[:8])[:400]
-        entries.append(current)
+        entries.append(_finalize_entry(current, current_body, current_body_content, current_volltext))
 
     # Deduplicate: prefer primary (euro-anchored) matches; among those, highest punkte,
     # then longest description. Fallback matches often capture cross-references.

@@ -1,5 +1,10 @@
 """
-GOPilot agent: tool-calling loop that maps a dictation + patient context to EBM GOPs.
+GOPilot agent: two-stage pipeline that maps a dictation + patient context to EBM GOPs.
+
+Stage 1 (research): HyDE document + neutral search terms -> hybrid retrieval
+(semantic + BM25) -> cross-encoder reranking.
+Stage 2 (decision): a structured prompt asks the model to select only candidates
+whose obligatory service content is documented in the dictation.
 """
 
 import json
@@ -17,7 +22,11 @@ from src.ingest import CHROMA_PATH, COLLECTION_NAME, OllamaEmbedder
 
 MODEL = "qwen3.5:9b"
 RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
-ORIENTIERUNGSPUNKTWERT = 0.127404  # Euro per Punkt, 2026
+
+# How many top-ranked candidates get full details fetched (reranker input) and
+# how many of them the decision model sees.
+MAX_DETAIL_CANDIDATES = 24
+MAX_DECISION_CANDIDATES = 14
 
 _collection = None
 _bm25_index = None
@@ -45,7 +54,6 @@ def _get_bm25_index() -> dict:
     data = _get_collection().get(include=["documents", "metadatas"])
     documents = data["documents"]
     metadatas = data["metadatas"]
-    ids = data["ids"]
     tokenized = [_retrieval_tokens(doc) for doc in documents]
     doc_freq: Counter[str] = Counter()
     for tokens in tokenized:
@@ -58,10 +66,8 @@ def _get_bm25_index() -> dict:
         for token, freq in doc_freq.items()
     }
     _bm25_index = {
-        "ids": ids,
         "documents": documents,
         "metadatas": metadatas,
-        "tokenized": tokenized,
         "term_counts": [Counter(tokens) for tokens in tokenized],
         "doc_lengths": [len(tokens) for tokens in tokenized],
         "avgdl": avgdl,
@@ -89,19 +95,18 @@ def _get_reranker(model_name: str):
         return None
 
 
-# --- Tool implementations ---
+# --- Retrieval ---
 
-def search_gops(query: str, n_results: int = 8, preferred_fachgruppe: str | None = None) -> list[dict]:
+def search_gops(query: str, n_results: int = 8) -> list[dict]:
     """Hybrid semantic + lexical search over GOP descriptions."""
-    expanded_query = _expand_query(query)
     fetch_n = max(n_results * 4, 50)
     semantic_results = _get_collection().query(
-        query_texts=[expanded_query],
+        query_texts=[query],
         n_results=fetch_n,
         include=["documents", "metadatas", "distances"],
     )
     semantic_hits = []
-    for i, doc_id in enumerate(semantic_results["ids"][0]):
+    for i in range(len(semantic_results["ids"][0])):
         semantic_hits.append(
             _hit_from_meta(
                 semantic_results["metadatas"][0][i],
@@ -111,12 +116,11 @@ def search_gops(query: str, n_results: int = 8, preferred_fachgruppe: str | None
             )
         )
 
-    bm25_hits = _bm25_search(expanded_query, fetch_n)
+    bm25_hits = _bm25_search(query, fetch_n)
     return _reciprocal_rank_fusion(
         semantic_hits=semantic_hits,
         bm25_hits=bm25_hits,
         n_results=n_results,
-        preferred_fachgruppe=preferred_fachgruppe,
     )
 
 
@@ -133,6 +137,8 @@ def get_gop_details(gop: str) -> dict | None:
         "fachgruppe": meta["fachgruppe"],
         "ausschluesse": json.loads(meta.get("ausschluesse", "[]")),
         "document": results["documents"][0],
+        # Full normative text incl. Abrechnungsbestimmungen/Anmerkungen
+        "volltext": meta.get("volltext", ""),
     }
 
 
@@ -196,7 +202,6 @@ def _reciprocal_rank_fusion(
     semantic_hits: list[dict],
     bm25_hits: list[dict],
     n_results: int,
-    preferred_fachgruppe: str | None = None,
     k: int = 60,
 ) -> list[dict]:
     merged: dict[str, dict] = {}
@@ -241,15 +246,6 @@ def get_patient(patient_id: str, quartal: str | None = None) -> dict | None:
     return get_patient_context(patient_id, quartal)
 
 
-def calculate_euro(punkte: int) -> float:
-    """Convert Punkte to Euro using the 2026 Orientierungspunktwert."""
-    return round(punkte * ORIENTIERUNGSPUNKTWERT, 2)
-
-
-def _expand_query(query: str) -> str:
-    return query
-
-
 def build_search_plan(
     dictation: str,
     patient_id: str,
@@ -273,6 +269,10 @@ def build_search_plan(
                     "Extrahiere nur Leistungen, Kontakte, Untersuchungen, Diagnostik, Therapien, "
                     "Prozeduren, Verordnungen, Bescheinigungen und dokumentierte Bedingungen, die "
                     "ausdruecklich im Diktat stehen. "
+                    "Erfasse auch die dokumentierte Kontakt- und Betreuungsform als eigene "
+                    "Suchbegriffe (z.B. Erst- oder Folgekontakt im Quartal, persoenlicher oder "
+                    "telefonischer Kontakt, Besuch, fortlaufende Betreuung chronischer "
+                    "Erkrankungen). "
                     "Keine Spekulationen."
                 ),
             },
@@ -333,136 +333,21 @@ def build_hypothetical_document(
     return " ".join((response.message.content or "").split())
 
 
-def _patient_summary(ctx: dict | None, patient_id: str, quartal: str) -> str:
-    if ctx is None:
-        return f"Patient {patient_id} (unbekannt), Quartal {quartal}, bereits abgerechnet: unbekannt"
-    already = ", ".join(ctx["gops_already_billed"]) or "keine"
-    return (
-        f"{ctx['name']}, {ctx['age']} Jahre, {ctx['gender']}, {ctx['insurance']}, "
-        f"Quartal {quartal}, bereits abgerechnet: {already}"
-    )
-
-
-# --- Tool schema for Ollama ---
-
-TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "search_gops",
-            "description": (
-                "Semantic search for EBM billing codes (GOPs) by medical description. "
-                "Use this to find relevant GOPs for procedures mentioned in a dictation."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "Medical procedure, billing term, or symptom to search for"},
-                    "n_results": {"type": "integer", "description": "Number of results (default 8)", "default": 8},
-                    "preferred_fachgruppe": {
-                        "type": "string",
-                        "description": "Optional preferred EBM fachgruppe from the billing practice context.",
-                    },
-                },
-                "required": ["query"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_gop_details",
-            "description": "Get full details for a specific GOP by its 5-digit code.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "gop": {"type": "string", "description": "5-digit GOP code, e.g. '03321'"},
-                },
-                "required": ["gop"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_patient",
-            "description": (
-                "Get patient context: age, gender, insurance, and which GOPs are already billed "
-                "this quarter. Always call this before recommending Pauschalen."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "patient_id": {"type": "string", "description": "Patient ID, e.g. 'P001'"},
-                    "quartal": {"type": "string", "description": "Quarter in format Q/YYYY, e.g. '2/2026'"},
-                },
-                "required": ["patient_id"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "calculate_euro",
-            "description": "Convert EBM Punkte to Euro using the 2026 Orientierungspunktwert (12.7404 ct/Punkt).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "punkte": {"type": "integer", "description": "Number of Punkte"},
-                },
-                "required": ["punkte"],
-            },
-        },
-    },
-]
-
-TOOL_FNS = {
-    "search_gops": search_gops,
-    "get_gop_details": get_gop_details,
-    "get_patient": get_patient,
-    "calculate_euro": calculate_euro,
-}
-
-SYSTEM_PROMPT = """\
-Du bist GOPilot, ein KI-Assistent für die EBM-Abrechnung in deutschen Arztpraxen.
-
-Deine Aufgabe: Analysiere Arztdiktate und empfehle die korrekten GOP-Nummern aus dem EBM 2026.
-
-Verfügbare Tools: get_patient, search_gops, get_gop_details, calculate_euro. Verwende keine anderen Toolnamen.
-Eine neutrale Suchplanung kann im User-Kontext enthalten sein. Sie ist keine Empfehlung und keine GOP-Liste.
-
-Vorgehensweise:
-1. Rufe als ersten Schritt das Tool get_patient mit der genannten Patienten-ID und dem Quartal auf.
-2. Nutze die Suchplanung und das Diktat, um die relevanten Leistungen und Abrechnungskontexte zu recherchieren.
-3. Rufe search_gops mit präzisen medizinischen oder abrechnungsbezogenen Suchbegriffen auf.
-4. Prüfe Details und Ausschlüsse für vielversprechende GOPs (get_gop_details).
-5. Berücksichtige: bereits abgerechnete GOPs, Alter/Geschlecht/Versicherung, Ausschlüsse.
-
-WICHTIGE REGELN:
-- Nenne NUR GOPs, die du explizit über search_gops oder get_gop_details gefunden hast.
-- Erfinde KEINE GOP-Nummern. Wenn du keine passende GOP findest, gib [] zurück.
-- Beschreibe keine zukünftige Suche. Wenn du suchen willst, rufe sofort das passende Tool auf.
-- Wiederhole keine identischen Suchanfragen. Finalisiere, sobald genug Kandidaten geprüft sind.
-- Die finale JSON-Liste ist KEINE Kandidatenliste. Nenne nur eindeutig passende GOPs.
-- Wenn mehrere Suchtreffer Alternativen für dieselbe Leistung sind, wähle höchstens die passendste GOP.
-- Schließe IMMER mit einer JSON-Liste ab (letzte Zeile): ["12345", "67890"] oder []
-
-Erkläre kurz deine Entscheidungen, dann als letzte Zeile die JSON-Liste.\
-"""
-
-
 def run_agent(
     dictation: str,
     patient_id: str,
     quartal: str,
     model: str = MODEL,
     think: bool = False,
-    max_steps: int = 10,
     practice_fachgruppe: str | None = None,
     reranker_model: str | None = RERANKER_MODEL,
     already_billed_gops: list[str] | None = None,
 ) -> dict:
-    """Run a deterministic research pass, then ask the model for a structured decision."""
+    """Run a deterministic research pass, then ask the model for a structured decision.
+
+    `already_billed_gops` overrides the DB billing state for a case (used by eval to
+    simulate quarter contexts); the practice management system always knows this.
+    """
     tool_log = []
 
     patient_ctx = get_patient(patient_id, quartal)
@@ -485,7 +370,7 @@ def run_agent(
             think=think,
         )
     except ollama.ResponseError as e:
-        return {"response": "[]", "steps": 1, "tool_log": tool_log, "search_plan": [], "error": str(e)}
+        return {"response": "[]", "tool_log": tool_log, "search_plan": [], "error": str(e)}
 
     try:
         search_terms = build_search_plan(
@@ -503,11 +388,11 @@ def run_agent(
     search_queries = [
         {"label": "hyde_document", "query": hypothetical_document, "n_results": 16},
         {"label": "dictation", "query": dictation, "n_results": 16},
-        *[{"label": term, "query": term, "n_results": 8} for term in search_terms[:6]],
+        *[{"label": term, "query": term, "n_results": 8} for term in search_terms[:8]],
     ]
     candidates: dict[str, dict] = {}
     for item in search_queries:
-        search_args = {"query": item["query"], "n_results": item.get("n_results", 8), "preferred_fachgruppe": practice_fachgruppe}
+        search_args = {"query": item["query"], "n_results": item.get("n_results", 8)}
         hits = _call_tool(search_gops, search_args)
         tool_log.append({"tool": "search_gops", "args": search_args, "result": hits})
         if not isinstance(hits, list):
@@ -534,15 +419,12 @@ def run_agent(
             if hit.get("distance") is not None:
                 entry["best_distance"] = min(entry.get("best_distance") or hit["distance"], hit["distance"])
 
-    # Inject fundamental Pauschalen that semantic search misses when specific procedures dominate
-    _inject_pauschal_candidates(candidates, patient_ctx, tool_log)
-
     rerank_text = f"{dictation}\n\n{hypothetical_document}"
     for gop in _rank_candidate_codes(
         candidates,
         preferred_fachgruppe=practice_fachgruppe,
         query_text=rerank_text,
-    )[:28]:
+    )[:MAX_DETAIL_CANDIDATES]:
         details = _call_tool(get_gop_details, {"gop": gop})
         tool_log.append({"tool": "get_gop_details", "args": {"gop": gop}, "result": details})
         if isinstance(details, dict):
@@ -561,10 +443,10 @@ def run_agent(
         for gop in _rank_candidate_codes(
             candidates,
             preferred_fachgruppe=practice_fachgruppe,
-            already_billed_gops=already_billed,
             query_text=rerank_text,
         )
-        if gop not in already_billed and _unsupported_special_context_penalty(candidates[gop]) == 0
+        if gop not in already_billed
+        and not _fachgruppe_conflict(candidates[gop], practice_fachgruppe)
         and _patient_context_mismatch_penalty(candidates[gop], patient_ctx) == 0
         and not _is_low_information_candidate(candidates[gop])
     ]
@@ -577,12 +459,11 @@ def run_agent(
         patient_ctx=patient_ctx,
         practice_fachgruppe=practice_fachgruppe,
         search_plan=search_terms,
-        candidates=[candidates[gop] for gop in ranked_codes[:24]],
+        candidates=[candidates[gop] for gop in ranked_codes[:MAX_DECISION_CANDIDATES]],
         think=think,
     )
     return {
         "response": response,
-        "steps": 2,
         "tool_log": tool_log,
         "search_plan": search_terms,
         "hypothetical_document": hypothetical_document,
@@ -597,67 +478,16 @@ def _call_tool(fn, args: dict):
         return f"Error: {e}"
 
 
-def _inject_pauschal_candidates(
-    candidates: dict[str, dict],
-    patient_ctx: dict | None,
-    tool_log: list,
-) -> None:
-    """Force-add Versichertenpauschale and Chronikerzuschlag when context warrants it.
-
-    Semantic search is dominated by specific procedures (ABDM, Spirographie, etc.) and
-    regularly fails to retrieve these high-frequency codes. We inject them directly so
-    the reranker and decision model can evaluate them on their merits.
-    """
-    if not patient_ctx:
-        return
-    already_billed = set(patient_ctx.get("gops_already_billed", []))
-    is_first_contact = patient_ctx.get("first_contact_this_quarter", False)
-    has_conditions = bool(patient_ctx.get("conditions"))
-
-    injections: list[tuple[str, str]] = []
-    if is_first_contact and "03000" not in already_billed:
-        injections.append(("03000", "pauschal_erstkontakt"))
-    if is_first_contact and has_conditions and "03220" not in already_billed:
-        injections.append(("03220", "pauschal_chroniker"))
-
-    for gop_code, label in injections:
-        if gop_code in candidates:
-            continue
-        details = _call_tool(get_gop_details, {"gop": gop_code})
-        tool_log.append({"tool": "get_gop_details", "args": {"gop": gop_code, "source": label}, "result": details})
-        if isinstance(details, dict):
-            candidates[gop_code] = {
-                "gop": gop_code,
-                "source_terms": [label],
-                "query_texts": [],
-                "best_rank": 0,
-                "best_distance": 0.0,
-                "search_hit": details,
-                "details": details,
-            }
-
-
-def _is_pauschal_injected(candidate: dict) -> bool:
-    return any(
-        t in ("pauschal_erstkontakt", "pauschal_chroniker")
-        for t in candidate.get("source_terms", [])
-    )
-
-
 def _rank_candidate_codes(
     candidates: dict[str, dict],
     preferred_fachgruppe: str | None = None,
-    already_billed_gops: set[str] | None = None,
     query_text: str = "",
 ) -> list[str]:
     return sorted(
         candidates,
         key=lambda gop: (
-            gop in (already_billed_gops or set()),
-            not _is_pauschal_injected(candidates[gop]),
             -float(candidates[gop].get("rerank_score", -999.0)),
             _fachgruppe_priority(candidates[gop], preferred_fachgruppe),
-            _unsupported_special_context_penalty(candidates[gop]),
             -_lexical_overlap(query_text, candidates[gop]),
             candidates[gop].get("best_distance", 99.0) or 99.0,
             candidates[gop].get("best_rank", 99),
@@ -753,6 +583,25 @@ def _rerank_items_for_report(candidates: dict[str, dict], codes: list[str]) -> l
     ]
 
 
+def _fachgruppe_conflict(candidate: dict, practice_fachgruppe: str | None) -> bool:
+    """True if the billing practice may not bill this GOP's chapter at all.
+
+    EBM Kapitel III is arztgruppenspezifisch: per the chapter preambles, those
+    GOPs may only be billed by the named specialty. Chapters II, IV, V, VII and
+    VIII are arztgruppenübergreifend. This mirrors catalogue structure for all
+    specialties; it is not tuned to any test case.
+    """
+    if not practice_fachgruppe:
+        return False
+    details = candidate.get("details") if isinstance(candidate.get("details"), dict) else {}
+    hit = candidate.get("search_hit") if isinstance(candidate.get("search_hit"), dict) else {}
+    kapitel = str(details.get("kapitel") or hit.get("kapitel") or "")
+    fachgruppe = str(details.get("fachgruppe") or hit.get("fachgruppe") or "")
+    if not kapitel.startswith("III"):
+        return False
+    return fachgruppe != practice_fachgruppe
+
+
 def _fachgruppe_priority(candidate: dict, preferred_fachgruppe: str | None) -> int:
     details = candidate.get("details") if isinstance(candidate.get("details"), dict) else {}
     hit = candidate.get("search_hit") if isinstance(candidate.get("search_hit"), dict) else {}
@@ -834,75 +683,6 @@ def _content_tokens(text: str) -> set[str]:
     return {token for token in _retrieval_tokens(text) if len(token) >= 4}
 
 
-def _unsupported_special_context_penalty(candidate: dict) -> int:
-    details = candidate.get("details") if isinstance(candidate.get("details"), dict) else {}
-    hit = candidate.get("search_hit") if isinstance(candidate.get("search_hit"), dict) else {}
-    document = str(details.get("document") or hit.get("document") or "").casefold()
-    source = " ".join([*candidate.get("source_terms", []), *candidate.get("query_texts", [])]).casefold()
-    special_markers = [
-        "unvorhergesehener inanspruchnahme",
-        "zwischen 19:00 und 7:00",
-        "samstagen",
-        "sonntagen",
-        "feiertagen",
-        "notdienst",
-        "besuch",
-        "visite",
-        "empfängnisregelung",
-        "sterilisation",
-        "schwangerschaftsabbruch",
-        "krankenkasse",
-        "muster 50",
-        "großen gelenkes",
-        "grossen gelenkes",
-        "unelastischer",
-        "palliativ",
-        "geriatr",
-        "nichtärztlich",
-        "nichtaerztlich",
-        "häuslichkeit",
-        "haeuslichkeit",
-        "chronische erkrankung",
-        "belastungs",
-        "langzeit-ekg",
-    ]
-    if not any(marker in document for marker in special_markers):
-        return 0
-    if any(
-        marker in source
-        for marker in (
-            "unvorhergesehen",
-            "19:00",
-            "samstag",
-            "sonntag",
-            "feiertag",
-            "notdienst",
-            "besuch",
-            "visite",
-            "empfängnisregelung",
-            "sterilisation",
-            "schwangerschaftsabbruch",
-            "krankenkasse",
-            "muster 50",
-            "großes gelenk",
-            "grosses gelenk",
-            "unelastisch",
-            "palliativ",
-            "geriatr",
-            "nichtärztlich",
-            "nichtaerztlich",
-            "häuslichkeit",
-            "haeuslichkeit",
-            "chronisch",
-            "chronische erkrankung",
-            "belastung",
-            "langzeit-ekg",
-        )
-    ):
-        return 0
-    return 1
-
-
 def _patient_context_mismatch_penalty(candidate: dict, patient_ctx: dict | None) -> int:
     if not patient_ctx:
         return 0
@@ -929,6 +709,31 @@ def _is_low_information_candidate(candidate: dict) -> bool:
     return not any(marker in document for marker in ("Obligater Leistungsinhalt", "Punkte", "Euro"))
 
 
+_JUDGE_SYSTEM_PROMPT = (
+    "Du bist ein EBM-Abrechnungsexperte. Pruefe genau eine Kandidaten-GOP und "
+    "entscheide, ob sie fuer dieses Diktat abgerechnet werden soll.\n"
+    "Regeln:\n"
+    "- Waehle die GOP nur, wenn die beschriebene Leistung im Diktat oder im "
+    "dokumentierten Patientenkontext dokumentiert ist. Eine Diagnose oder ein "
+    "Symptom allein reicht nicht.\n"
+    "- Technische Einzelheiten des obligaten Leistungsinhalts (z.B. "
+    "Messintervalle, Ableitungszahlen, Registrierungsdetails) gelten als "
+    "erfuellt, wenn die Leistung selbst fachgerecht dokumentiert ist und nichts "
+    "im Diktat dagegen spricht.\n"
+    "- Situative Sonderbedingungen (z.B. Uhrzeiten, Wochenende/Feiertag, "
+    "Notdienst, Besuch, Altersgrenzen, Mindestdauer von Gespraechen, spezielle "
+    "Programme oder Bescheinigungen) muessen dagegen explizit dokumentiert "
+    "sein.\n"
+    "- Beruecksichtige Abrechnungsbestimmungen und Anmerkungen im GOP-Text, "
+    "insbesondere ob die GOP neben bereits abgerechneten GOPs berechnungsfaehig "
+    "ist.\n"
+    "- Eine Zuschlags-GOP ist waehlbar, wenn ihre Basis-GOP bereits abgerechnet "
+    "ist oder nach Diktat und Kontext heute ebenfalls zur Abrechnung ansteht.\n"
+    "- Beruecksichtige Alter und Geschlecht des Patienten.\n"
+    "Antworte ausschliesslich mit JSON: {\"select\": true} oder {\"select\": false}."
+)
+
+
 def _decide_from_candidates(
     model: str,
     dictation: str,
@@ -940,103 +745,118 @@ def _decide_from_candidates(
     candidates: list[dict],
     think: bool,
 ) -> str:
-    candidate_summary = [_candidate_for_prompt(candidate) for candidate in candidates[:14]]
-    if not candidate_summary:
+    """Judge each candidate independently, then resolve catalogue exclusions.
+
+    Binary per-candidate judgements are more reliable for small models than a
+    single selection over the full candidate list. Conflicts between selected
+    candidates are resolved deterministically via the catalogue's Ausschluss
+    lists, keeping the higher-ranked candidate.
+    """
+    if not candidates:
         return "[]"
-    allowed_gops = [candidate["gop"] for candidate in candidate_summary]
+    selected: list[str] = []
+    for candidate in candidates:
+        if _judge_candidate(model, dictation, patient_id, quartal, patient_ctx,
+                            practice_fachgruppe, candidate, think):
+            selected.append(candidate["gop"])
+    by_gop = {candidate["gop"]: candidate for candidate in candidates}
+    selected = _resolve_exclusions(selected, by_gop)
+    return json.dumps(selected, ensure_ascii=False)
+
+
+def _judge_candidate(
+    model: str,
+    dictation: str,
+    patient_id: str,
+    quartal: str,
+    patient_ctx: dict | None,
+    practice_fachgruppe: str | None,
+    candidate: dict,
+    think: bool,
+) -> bool:
+    summary = _candidate_for_prompt(candidate)
     try:
         response = _chat_with_retry(
             model=model,
             messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "Du bist ein EBM-Abrechnungsexperte. Entscheide aus einer vorgegebenen "
-                        "Kandidatenliste, welche GOPs zum Diktat und Patientenkontext passen. "
-                        "Die Kandidaten stammen aus search_gops/get_gop_details. Du darfst keine "
-                        "anderen GOPs nennen. Suchtreffer sind nur Kandidaten, nicht automatisch "
-                        "korrekt. Waehle eine GOP nur, wenn ihr obligater Leistungsinhalt im Diktat "
-                        "dokumentiert ist oder sich direkt aus Patientenkontakt und Kontext ergibt. "
-                        "Bewerte jeden Kandidaten unabhaengig. Verwirf nicht alle Kandidaten, nur "
-                        "weil einige Suchtreffer unpassend sind. Wenn die Beschreibung eines "
-                        "Kandidaten eine dokumentierte Untersuchung, Prozedur oder Therapie direkt "
-                        "abdeckt, soll dieser Kandidat ausgewaehlt werden, sofern keine klare "
-                        "Gegenbedingung in Details oder Patientenkontext erkennbar ist. Nutze die "
-                        "source_terms als Hinweis, welche dokumentierte Leistung den Kandidaten "
-                        "gefunden hat. Wenn source_terms und Kandidatendokument dieselbe Leistung "
-                        "fachsprachlich beschreiben, waehle den Kandidaten. Warte nicht auf absolute "
-                        "Sicherheit, wenn der Leistungsinhalt dokumentiert ist. "
-                        "Bereits in diesem Quartal abgerechnete GOPs wurden aus der erlaubten "
-                        "Kandidatenliste entfernt. Noch nicht abgerechnete Zuschlaege duerfen "
-                        "trotzdem gewaehlt werden, wenn der obligate Leistungsinhalt dokumentiert "
-                        "ist. Eine Versichertenpauschale kann direkt durch einen persoenlichen "
-                        "oder Video-Arzt-Patienten-Kontakt im Quartal begruendet sein. Ein "
-                        "Chronikerzuschlag kann direkt durch chronische Erkrankung, persoenlichen "
-                        "Kontakt und dokumentierte fortlaufende Betreuung begruendet sein. "
-                        "Eine Diagnose, ein Symptom oder ein aehnlicher Begriff allein reicht nicht. "
-                        "Beruecksichtige Alter, Fachgruppe und dokumentierte Umstaende: Kinder- und "
-                        "Jugendmedizin passt nur bei Kindern/Jugendlichen oder passendem Kontext; "
-                        "Bevorzuge bei gleichwertigen Kandidaten die abrechnende Praxis/Fachgruppe. "
-                        "Kandidaten anderer Fachgruppen sollen nur gewaehlt werden, wenn sie fachlich "
-                        "klar besser passen oder arztgruppenuebergreifend sind. "
-                        "Randzeiten, Notdienst, palliativmedizinische Versorgung, spezielle Programme "
-                        "oder Bescheinigungen passen nur, wenn sie dokumentiert sind. Wenn ein "
-                        "Kandidatentext Sonderbedingungen wie unvorhergesehene Inanspruchnahme, "
-                        "bestimmte Uhrzeiten, Wochenende/Feiertag, organisierter Notdienst, "
-                        "Besuch/Visite oder spezielle Versorgung nennt, waehle ihn nur bei expliziter "
-                        "Dokumentation dieser Sonderbedingung. Bei fehlender Sonderbedingung bevorzuge "
-                        "allgemeinere Kandidaten fuer dieselbe Leistung, falls vorhanden. "
-                        "Unterscheide einfache Messungen von speziellen Langzeit-, Belastungs-, "
-                        "apparativen oder komplexen Untersuchungen: Waehle solche Spezialkandidaten "
-                        "nur, wenn Dauer, Belastung, Langzeitaufzeichnung, Apparateeinsatz oder "
-                        "Komplexinhalt passend dokumentiert ist. "
-                        "Gib ausschliesslich eine JSON-Liste der final empfohlenen 5-stelligen "
-                        "GOP-Strings aus. Wenn kein Kandidat plausibel passt, gib [] aus."
-                    ),
-                },
+                {"role": "system", "content": _JUDGE_SYSTEM_PROMPT},
                 {
                     "role": "user",
                     "content": (
                         f"Patient-ID: {patient_id}, Quartal: {quartal}\n"
                         f"Abrechnende Praxis/Fachgruppe: {practice_fachgruppe or 'unbekannt'}\n"
                         f"Patientenkontext:\n{json.dumps(patient_ctx, ensure_ascii=False)}\n\n"
-                        f"Neutrale Suchplanung:\n{json.dumps(search_plan, ensure_ascii=False)}\n\n"
                         f"Diktat:\n{dictation}\n\n"
-                        f"Erlaubte GOPs:\n{json.dumps(allowed_gops, ensure_ascii=False)}\n\n"
-                        f"Kandidaten:\n{json.dumps(candidate_summary, ensure_ascii=False, indent=2)}"
+                        f"Kandidat:\n{json.dumps(summary, ensure_ascii=False, indent=2)}"
                     ),
                 },
             ],
-            options={"temperature": 0, "num_predict": 180},
+            options={"temperature": 0, "num_predict": 30},
             think=think,
         )
     except ollama.ResponseError:
-        return "[]"
-    return _filter_decision_response((response.message.content or "").strip(), allowed_gops)
+        return False
+    return _parse_judge_response((response.message.content or "").strip())
+
+
+def _parse_judge_response(text: str) -> bool:
+    match = re.search(r"\{[^{}]*\}", text, re.DOTALL)
+    if match:
+        try:
+            value = json.loads(match.group())
+            if isinstance(value, dict) and isinstance(value.get("select"), bool):
+                return value["select"]
+        except json.JSONDecodeError:
+            pass
+    return bool(re.search(r"\btrue\b", text, re.IGNORECASE))
+
+
+def _resolve_exclusions(selected: list[str], by_gop: dict[str, dict]) -> list[str]:
+    """Resolve mutually exclusive selections, keeping the higher-valued GOP.
+
+    Uses the Ausschluss lists parsed from the catalogue ("nicht neben den
+    Gebührenordnungspositionen ..."). When two approved candidates exclude each
+    other, EBM practice bills the higher-valued service, so conflicts are
+    resolved by Punkte (rank order as tie-break). Output keeps rank order.
+    """
+    by_value = sorted(selected, key=lambda gop: -_candidate_punkte(by_gop.get(gop, {})))
+    kept: list[str] = []
+    for gop in by_value:
+        exclusions = set(_candidate_exclusions(by_gop.get(gop, {})))
+        conflict = any(
+            other in exclusions or gop in _candidate_exclusions(by_gop.get(other, {}))
+            for other in kept
+        )
+        if not conflict:
+            kept.append(gop)
+    return [gop for gop in selected if gop in kept]
+
+
+def _candidate_punkte(candidate: dict) -> int:
+    details = candidate.get("details") if isinstance(candidate.get("details"), dict) else {}
+    hit = candidate.get("search_hit") if isinstance(candidate.get("search_hit"), dict) else {}
+    punkte = details.get("punkte", hit.get("punkte"))
+    return int(punkte) if isinstance(punkte, (int, float)) else 0
+
+
+def _candidate_exclusions(candidate: dict) -> list[str]:
+    details = candidate.get("details") if isinstance(candidate.get("details"), dict) else {}
+    exclusions = details.get("ausschluesse", [])
+    return [str(e) for e in exclusions] if isinstance(exclusions, list) else []
 
 
 def _candidate_for_prompt(candidate: dict) -> dict:
     details = candidate.get("details") if isinstance(candidate.get("details"), dict) else {}
     hit = candidate.get("search_hit") if isinstance(candidate.get("search_hit"), dict) else {}
+    # Prefer the full normative text (incl. Abrechnungsbestimmungen/Anmerkungen)
+    # over the embedding snippet so the judge sees billing constraints.
+    text = details.get("volltext") or details.get("document") or hit.get("document") or ""
     return {
         "gop": candidate.get("gop"),
-        "source_terms": list(dict.fromkeys(candidate.get("source_terms", []))),
-        "best_rank": candidate.get("best_rank"),
-        "punkte": details.get("punkte", hit.get("punkte")),
         "fachgruppe": details.get("fachgruppe", hit.get("fachgruppe")),
         "ausschluesse": details.get("ausschluesse", []),
-        "document": _truncate(str(details.get("document") or hit.get("document", "")), 600),
+        "text": _truncate(str(text), 1600),
     }
-
-
-def _filter_decision_response(text: str, allowed_gops: list[str]) -> str:
-    allowed = set(allowed_gops)
-    selected = []
-    for gop in _parse_json_list(text):
-        code = str(gop).strip()
-        if code in allowed and code not in selected:
-            selected.append(code)
-    return json.dumps(selected, ensure_ascii=False)
 
 
 def _chat_with_retry(*args, retries: int = 2, **kwargs):

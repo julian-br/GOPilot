@@ -9,6 +9,6 @@
     "Telefonische ärztliche Beratung wegen Erkrankung",
     "Wiederholungsrezept ohne persönlichen Kontakt"
   ],
-  "expected_gops": ["01435", "01430"],
-  "notes": "01435 für die telefonische ärztliche Beratung im Zusammenhang mit der Erkrankung (einmal im Behandlungsfall abrechenbar, noch nicht verbraucht). 01430 für das Wiederholungsrezept ohne persönlichen Arzt-Patienten-Kontakt. Beide GOPs sind kombinierbar, da unterschiedliche Leistungen (Beratungsleistung vs. Verwaltungsleistung). 03000 und 03220 sind bereits in diesem Quartal abgerechnet, da Asthma bronchiale als lebensverändernde chronische Erkrankung für 03220 qualifiziert."
+  "expected_gops": [],
+  "notes": "Korrektur 06/2026: Erwartung von ['01435', '01430'] auf [] geändert. Laut Anmerkungen im EBM gilt: (1) Kommt in demselben Arztfall eine Versichertenpauschale zur Abrechnung, sind 01430 und 01435 nicht berechnungsfähig — 03000 und 03220 sind hier bereits abgerechnet. (2) 01435 ist ohnehin — mit Ausnahme von 01431, 40128, 40129 — nicht neben anderen GOPs berechnungsfähig, die alte Kombination ['01435', '01430'] war also in sich katalogwidrig. Telefonische Beratung und Wiederholungsrezept sind in diesem Kontext mit der Versichertenpauschale abgegolten. Bewusst als Negativfall belassen: Das System muss plausibel aussehende Kandidaten wegen der Pauschalen-Ausschlüsse verwerfen."
 }

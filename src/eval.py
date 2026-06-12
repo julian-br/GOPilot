@@ -4,7 +4,11 @@ Evaluation pipeline: compares GOP recommendation quality across conditions.
 Conditions (configured in YAML):
   basic   = dictation + patient data from SQLite
   rag     = dictation + patient data + ChromaDB top-k
-  agent   = tool-calling agent with ChromaDB tools
+  agent   = research pipeline (HyDE + multi-query hybrid retrieval + reranker) + decision step
+
+Post-processing (uniform across ALL conditions): predicted GOPs that are already
+billed this quarter are removed before scoring. This mirrors real practice
+management software, which knows the billing state and rejects double billing.
 
 Usage:
     python -m src.eval
@@ -44,6 +48,7 @@ class EvalConfig:
     practice_fachgruppe: str = "Hausärztlicher Versorgungsbereich"
     reranker_model: str | None = "BAAI/bge-reranker-v2-m3"
     conditions: list[Condition] = field(default_factory=lambda: ["basic", "rag", "agent"])
+    runs: int = 1  # repeated full passes to quantify run-to-run variance
 
     @classmethod
     def from_yaml(cls, path: Path) -> "EvalConfig":
@@ -126,7 +131,6 @@ def run_condition(
             "reranker": result.get("reranker"),
             "practice_fachgruppe": cfg.practice_fachgruppe,
             "tool_log": result["tool_log"],
-            "steps": result["steps"],
             "error": result.get("error"),
             "metrics": metrics(predicted, case["expected_gops"]),
         }
@@ -146,12 +150,7 @@ def run_condition(
     }
 
 
-def run(cfg: EvalConfig, verbose: bool = False) -> dict:
-    cases = load_cases()
-    col = chromadb.PersistentClient(path=CHROMA_PATH).get_collection(
-        name=COLLECTION_NAME, embedding_function=OllamaEmbedder()
-    )
-
+def _run_cases(cfg: EvalConfig, cases: list[dict], col, verbose: bool) -> list[dict]:
     rows = []
     for i, case in enumerate(cases, 1):
         print(f"[{i}/{len(cases)}] {case['case_id']} ...", flush=True)
@@ -169,22 +168,60 @@ def run(cfg: EvalConfig, verbose: bool = False) -> dict:
             for cond in cfg.conditions:
                 m = row[cond]["metrics"]
                 print(f"  {cond:<8}: {row[cond]['predicted']}  (P={m['precision']:.2f} R={m['recall']:.2f} F1={m['f1']:.2f})")
+    return rows
 
-    # Summary
-    n = len(rows)
-    summary = {
-        cond: round(sum(r[cond]["metrics"]["f1"] for r in rows) / n, 4)
+
+def _mean(values: list[float]) -> float:
+    return sum(values) / len(values) if values else 0.0
+
+
+def _sample_std(values: list[float]) -> float:
+    if len(values) < 2:
+        return 0.0
+    m = _mean(values)
+    return (sum((v - m) ** 2 for v in values) / (len(values) - 1)) ** 0.5
+
+
+def run(cfg: EvalConfig, verbose: bool = False) -> dict:
+    cases = load_cases()
+    col = chromadb.PersistentClient(path=CHROMA_PATH).get_collection(
+        name=COLLECTION_NAME, embedding_function=OllamaEmbedder()
+    )
+
+    run_reports = []
+    for run_idx in range(1, cfg.runs + 1):
+        if cfg.runs > 1:
+            print(f"\n##### Run {run_idx}/{cfg.runs} #####", flush=True)
+        rows = _run_cases(cfg, cases, col, verbose)
+        n = len(rows)
+        summary = {
+            cond: round(sum(r[cond]["metrics"]["f1"] for r in rows) / n, 4)
+            for cond in cfg.conditions
+        }
+        _print_table(rows, cfg, summary)
+        run_reports.append({"run": run_idx, "summary": summary, "cases": rows})
+
+    aggregate = {
+        cond: {
+            "mean_f1": round(_mean([r["summary"][cond] for r in run_reports]), 4),
+            "std_f1": round(_sample_std([r["summary"][cond] for r in run_reports]), 4),
+            "run_f1s": [r["summary"][cond] for r in run_reports],
+        }
         for cond in cfg.conditions
     }
-
-    _print_table(rows, cfg, summary)
+    if cfg.runs > 1:
+        print(f"\n===== Aggregate over {cfg.runs} runs (mean ± sample std) =====")
+        for cond in cfg.conditions:
+            agg = aggregate[cond]
+            print(f"  {cond:<8}: {agg['mean_f1']:.3f} ± {agg['std_f1']:.3f}   runs: {agg['run_f1s']}")
+        print()
 
     return {
         "experiment": cfg.experiment,
         "timestamp": datetime.now().isoformat(timespec="seconds"),
         "config": asdict(cfg),
-        "summary": {**{"n_cases": n}, **{f"avg_f1_{c}": v for c, v in summary.items()}},
-        "cases": rows,
+        "summary": {"n_cases": len(cases), "n_runs": cfg.runs, "f1": aggregate},
+        "runs": run_reports,
     }
 
 
@@ -229,9 +266,12 @@ def main() -> None:
         help="Path to experiment config YAML (default: configs/default.yaml)",
     )
     parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--runs", type=int, default=None, help="Override number of repeated passes")
     args = parser.parse_args()
 
     cfg = EvalConfig.from_yaml(args.config)
+    if args.runs is not None:
+        cfg.runs = max(1, args.runs)
     report = run(cfg, verbose=args.verbose)
     path = save_report(report)
     print(f"Report saved: {path}")

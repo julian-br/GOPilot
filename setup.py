@@ -13,8 +13,8 @@ import sys
 
 import ollama
 
-from src.agent import MODEL
-from src.db import init_db, seed_db
+from src.agent import MODEL, RERANKER_MODEL
+from src.db import SEED_PATIENTS, init_db, seed_db
 from src.fetch_ebm import fetch_latest_pdf
 from src.ingest import EMBED_MODEL, ingest
 
@@ -31,9 +31,7 @@ def pull_models() -> None:
     step("Pulling Ollama models")
     local = {m.model for m in ollama.list().models}
     for model in REQUIRED_MODELS:
-        # ollama list returns names like "qwen3.5:9b", match by prefix
-        already = any(m.startswith(model.split(":")[0]) and model in m for m in local)
-        if already:
+        if model in local:
             print(f"  {model}: already present, skipping")
             continue
         print(f"  Pulling {model} ...")
@@ -44,16 +42,22 @@ def pull_models() -> None:
         print(f"  {model}: done")
 
 
+def pull_reranker() -> None:
+    step(f"Caching reranker model ({RERANKER_MODEL})")
+    try:
+        from sentence_transformers import CrossEncoder
+    except ImportError:
+        print("  sentence-transformers not installed — agent will fall back to lexical reranking")
+        return
+    CrossEncoder(RERANKER_MODEL, trust_remote_code=True)
+    print("  Reranker cached locally")
+
+
 def setup_db() -> None:
     step("Initializing SQLite database with mock patients")
     init_db()
     seed_db()
-    print("  DB ready at data/gopilot.db")
-    print(
-        "  Mock patients: P001 Müller (67, Diabetes/Hypertonie), "
-        "P002 Schmidt (34, akut), P003 Weber (78, COPD/Herzinsuffizienz), "
-        "P004 Becker (50), P005 Kaya (41, Asthma)"
-    )
+    print(f"  DB ready at data/gopilot.db ({len(SEED_PATIENTS)} mock patients)")
 
 
 def setup_vectordb() -> None:
@@ -73,6 +77,7 @@ def main() -> None:
 
     if not args.skip_models:
         pull_models()
+        pull_reranker()
 
     setup_db()
 

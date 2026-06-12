@@ -1,92 +1,41 @@
 # GOPilot
 
-GOPilot is a local AI assistant for EBM billing code recommendation in German GP practices. Given a doctor's dictation and patient context, it recommends the correct GOP (Gebührenordnungsposition) codes from the EBM 2026 catalogue.
+GOPilot is a local AI assistant for EBM billing code recommendation in German GP practices. Given a doctor's dictation and patient context, it recommends GOP (Gebührenordnungsposition) codes from the EBM 2026 catalogue.
 
-It runs fully offline using a local LLM (Qwen3.5 9B via Ollama) and a local vector database (ChromaDB). The system is built for research and evaluation, not production use.
+It runs fully offline using a local LLM (Qwen3.5 9B via Ollama) and a local vector database (ChromaDB). Built for research and evaluation, not production use.
 
 ## How it works
 
-GOPilot offers three recommendation modes, evaluated against a ground-truth test set:
+Three recommendation modes, compared in the evaluation:
 
-| Mode | Description | Avg F1 (20 cases) |
-|------|-------------|-------------------|
-| **Basic** | Plain LLM with patient context | 0.20 |
-| **RAG** | LLM + top-k semantic retrieval from ChromaDB | 0.51 |
-| **Agent** | Multi-query retrieval + BGE reranker + structured decision step | **0.67** |
+- **Basic** — plain LLM with patient context
+- **RAG** — LLM + top-k semantic retrieval from ChromaDB
+- **Agent** — HyDE document + neutral search terms → hybrid retrieval (semantic + BM25) → cross-encoder reranking (`BAAI/bge-reranker-v2-m3`) → structured decision step constrained to the retrieved candidates
 
-The agent pipeline:
-1. Builds a hypothetical EBM document (HyDE) and extracts neutral search terms from the dictation
-2. Runs up to 8 parallel hybrid searches (semantic + BM25) against the EBM vector DB
-3. Injects fundamental Pauschalen (03000, 03220) that semantic search misses when specific procedures dominate
-4. Reranks all candidates with `BAAI/bge-reranker-v2-m3` (cross-encoder, raw logits)
-5. Passes the top-24 ranked candidates to a structured decision model that selects only what is explicitly documented
-
-## Prerequisites
-
-- [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or Anaconda
-- [Ollama](https://ollama.com/) installed and running
+There is no hard-coded GOP knowledge: every recommended code must come out of retrieval. Deterministic filters only encode catalogue rules (age limits from the GOP text, Kapitel-III specialty restriction), nothing tuned to the test cases.
 
 ## Setup
 
+Requires [Miniconda](https://docs.conda.io/en/latest/miniconda.html) and a running [Ollama](https://ollama.com/).
+
 ```bash
-# 1. Create conda environment
 conda env create -f environment.yml
 conda activate gopilot
-
-# 2. Run one-shot setup (pulls models, inits DB, fetches + ingests EBM data)
-python setup.py
+python setup.py   # pulls models, inits DB, fetches + ingests EBM PDF, caches reranker
 ```
-
-Setup pulls `qwen3.5:9b` and `qwen3-embedding:4b` via Ollama, downloads the latest KBV EBM PDF, parses all GOPs, and stores them in ChromaDB.
 
 ## Usage
 
 ```bash
-# Interactive agent chat
-python chat.py
-
-# Run evaluation across all conditions and write reports/default.json
-python -m src.eval
-
-# Run evaluation with a custom config
-python -m src.eval --config configs/default.yaml --verbose
-
-# Re-fetch and re-ingest latest EBM (e.g. after a quarterly update)
-python -m src.fetch_ebm
-
-# Re-ingest an already downloaded PDF
-python -m src.fetch_ebm --ingest-only
-```
-
-## Project structure
-
-```
-GOPilot/
-├── setup.py                   # one-shot setup script
-├── chat.py                    # interactive agent chat
-├── configs/
-│   └── default.yaml           # evaluation config (model, conditions, reranker)
-├── src/
-│   ├── agent.py               # core agent: retrieval, reranking, decision
-│   ├── db.py                  # SQLite mock patient DB with seed data
-│   ├── eval.py                # evaluation runner (basic / rag / agent)
-│   ├── fetch_ebm.py           # fetch latest KBV EBM PDF
-│   ├── inference.py           # LLM prompt builder + GOP list parser
-│   └── ingest.py              # EBM PDF parser + ChromaDB ingest
-├── data/
-│   ├── ebm_raw/               # downloaded EBM PDFs
-│   ├── chroma_db/             # vector DB (generated)
-│   ├── gopilot.db             # SQLite patient DB (generated)
-│   └── test_dictations/       # 20 annotated test cases with ground truth GOPs
-├── reports/
-│   └── default.json           # latest evaluation report
-└── environment.yml
+python chat.py            # interactive agent chat
+python -m src.eval        # evaluate all conditions -> reports/default.json
+python -m src.fetch_ebm   # re-fetch + re-ingest latest EBM (e.g. quarterly update)
 ```
 
 ## Evaluation
 
-The test set contains 20 hand-crafted cases covering common GP billing scenarios: first contacts, chronic patient follow-ups, home visits, phone consultations, EKG, spirometry, wound care, and others. Each case has a dictation, patient context (already billed GOPs, diagnoses), and ground truth GOPs.
+20 hand-annotated GP billing cases (`data/test_dictations/`), scored with per-case F1 against ground-truth GOPs. Predicted codes that are already billed in the quarter are removed before scoring — uniformly in all conditions, mirroring practice management software. Results land in `reports/<experiment>.json`.
 
-Cases where the expected answer is `[]` (no billable service) count as correct when the agent also returns `[]`.
+Current results (avg F1, 20 cases, 3 runs): **basic 0.10 · RAG 0.33 · agent 0.60** — zero variance across runs (GPU inference at `temperature=0` is deterministic here; verify with `python -m src.eval --runs 3`).
 
-Note: The LLM runs at `temperature=0` but CPU inference is not bit-exact, so individual case results vary slightly between runs. Average F1 is stable within ±0.05 across runs.
+Caveat: the test cases were also used while iterating on prompts and retrieval, so reported numbers are dev-set numbers. An unbiased estimate needs newly written, held-out cases.

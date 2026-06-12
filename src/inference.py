@@ -65,12 +65,12 @@ def ask_llm(user: str, system: str = SYSTEM_PROMPT, model: str = MODEL, think: b
     return resp.message.content.strip()
 
 
-def parse_gops(text: str, *, allow_text_fallback: bool = False) -> list[str]:
-    """Extract 5-digit GOP numbers from LLM response (handles JSON or free text).
+def parse_gops(text: str) -> list[str]:
+    """Extract 5-digit GOP numbers from LLM response.
 
     Tries all JSON arrays from last to first — the agent always ends with its
     final recommendation as the last [...], so this prefers that over intermediate
-    arrays that appear in tool-result echoes.
+    arrays that appear earlier in the response.
     """
     matches = list(re.finditer(r"\[.*?\]", text, re.DOTALL))
     for m in reversed(matches):
@@ -81,10 +81,7 @@ def parse_gops(text: str, *, allow_text_fallback: bool = False) -> list[str]:
                 return gops
         except (json.JSONDecodeError, TypeError):
             pass
-    if not allow_text_fallback:
-        return []
-    # Fallback: extract any 5-digit numbers (deduplicated, order preserved)
-    return _unique(re.findall(r"\b(\d{5})\b", text))
+    return []
 
 
 def _unique(values) -> list[str]:

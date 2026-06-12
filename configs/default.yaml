@@ -4,6 +4,7 @@ top_k: 10
 thinking: false
 practice_fachgruppe: Hausärztlicher Versorgungsbereich
 reranker_model: BAAI/bge-reranker-v2-m3
+runs: 1
 conditions:
   - basic
   - rag

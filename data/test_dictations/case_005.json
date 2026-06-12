@@ -2,13 +2,13 @@
   "case_id": "case_005",
   "patient_id": "P004",
   "quartal": "2/2026",
-  "already_billed_gops": ["03000"],
+  "already_billed_gops": [],
   "scenario": "Wiederholungsrezept und Überweisung ohne persönlichen Arzt-Patienten-Kontakt",
-  "dictation": "Herr Becker, 50 Jahre. Kein persönlicher Arzt-Patienten-Kontakt und keine telefonische ärztliche Beratung. Auf Wunsch des Patienten wurden ein Wiederholungsrezept für die Dauermedikation und eine Überweisung zum Orthopäden ausgestellt. Es erfolgte nur die Verwaltungstätigkeit ohne Untersuchung.",
+  "dictation": "Herr Becker, 50 Jahre. Kein persönlicher Arzt-Patienten-Kontakt und keine telefonische ärztliche Beratung in diesem Quartal. Auf Wunsch des Patienten wurden ein Wiederholungsrezept für die Dauermedikation und eine Überweisung zum Orthopäden ausgestellt. Es erfolgte nur die Verwaltungstätigkeit ohne Untersuchung.",
   "procedures": [
     "Wiederholungsrezept ohne persönlichen Kontakt",
     "Überweisung ohne persönlichen Kontakt"
   ],
   "expected_gops": ["01430"],
-  "notes": "01430 beschreibt Wiederholungsrezept und/oder Überweisung ohne persönlichen Arzt-Patienten-Kontakt. 01435 passt nicht, weil keine telefonische ärztliche Beratung wegen Erkrankung dokumentiert ist."
+  "notes": "01430 beschreibt Wiederholungsrezept und/oder Überweisung ohne persönlichen Arzt-Patienten-Kontakt. 01435 passt nicht, weil keine telefonische ärztliche Beratung wegen Erkrankung dokumentiert ist. Korrektur 06/2026: Laut Anmerkung im EBM ist 01430 im Arztfall nicht neben anderen GOPs berechnungsfähig; kommt im Arztfall eine Versichertenpauschale zur Abrechnung, ist 01430 nicht berechnungsfähig. Der Quartalskontext wurde daher auf 'keine Vorabrechnung' korrigiert (vorher: 03000 abgerechnet, womit das alte Ground Truth ['01430'] katalogwidrig war)."
 }
