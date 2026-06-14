@@ -18,7 +18,13 @@ import chromadb
 import ollama
 
 from src.db import get_patient_context
-from src.ingest import CHROMA_PATH, COLLECTION_NAME, OllamaEmbedder
+from src.ingest import (
+    CHROMA_PATH,
+    COLLECTION_NAME,
+    OllamaEmbedder,
+    _expand_gop_range,
+    _GOP_RANGE,
+)
 
 MODEL = "qwen3.5:9b"
 RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
@@ -339,12 +345,16 @@ def run_agent(
     quartal: str,
     model: str = MODEL,
     think: bool = False,
+    judge_think: bool = True,
     practice_fachgruppe: str | None = None,
     reranker_model: str | None = RERANKER_MODEL,
     already_billed_gops: list[str] | None = None,
 ) -> dict:
     """Run a deterministic research pass, then ask the model for a structured decision.
 
+    `think` controls thinking for the generative steps (HyDE, search plan);
+    `judge_think` controls it for the per-candidate decision, where reasoning
+    before the binary verdict stabilises judgements.
     `already_billed_gops` overrides the DB billing state for a case (used by eval to
     simulate quarter contexts); the practice management system always knows this.
     """
@@ -460,7 +470,8 @@ def run_agent(
         practice_fachgruppe=practice_fachgruppe,
         search_plan=search_terms,
         candidates=[candidates[gop] for gop in ranked_codes[:MAX_DECISION_CANDIDATES]],
-        think=think,
+        think=judge_think,
+        already_billed=already_billed,
     )
     return {
         "response": response,
@@ -730,7 +741,13 @@ _JUDGE_SYSTEM_PROMPT = (
     "- Eine Zuschlags-GOP ist waehlbar, wenn ihre Basis-GOP bereits abgerechnet "
     "ist oder nach Diktat und Kontext heute ebenfalls zur Abrechnung ansteht.\n"
     "- Beruecksichtige Alter und Geschlecht des Patienten.\n"
-    "Antworte ausschliesslich mit JSON: {\"select\": true} oder {\"select\": false}."
+    "- Waehle nur mit select=true, wenn du als Beleg ein woertliches Zitat aus "
+    "dem Diktat oder dem Patientenkontext angeben kannst, das den "
+    "Leistungsinhalt belegt.\n"
+    "Denke kurz und zielgerichtet nach. Antworte ausschliesslich mit JSON:\n"
+    "{\"evidence\": \"woertliches Zitat als Beleg\", \"select\": true}\n"
+    "oder\n"
+    "{\"evidence\": \"\", \"select\": false}"
 )
 
 
@@ -744,13 +761,15 @@ def _decide_from_candidates(
     search_plan: list[str],
     candidates: list[dict],
     think: bool,
+    already_billed: set[str] | None = None,
 ) -> str:
-    """Judge each candidate independently, then resolve catalogue exclusions.
+    """Judge each candidate independently, then apply catalogue constraints.
 
     Binary per-candidate judgements are more reliable for small models than a
-    single selection over the full candidate list. Conflicts between selected
-    candidates are resolved deterministically via the catalogue's Ausschluss
-    lists, keeping the higher-ranked candidate.
+    single selection over the full candidate list. Two deterministic,
+    catalogue-derived post-filters then run on the approved set: dependent GOPs
+    (Zuschläge) whose base GOP is neither billed nor selected are dropped, and
+    mutually exclusive selections are resolved by keeping the higher-valued GOP.
     """
     if not candidates:
         return "[]"
@@ -760,6 +779,7 @@ def _decide_from_candidates(
                             practice_fachgruppe, candidate, think):
             selected.append(candidate["gop"])
     by_gop = {candidate["gop"]: candidate for candidate in candidates}
+    selected = _enforce_base_dependencies(selected, by_gop, already_billed or set())
     selected = _resolve_exclusions(selected, by_gop)
     return json.dumps(selected, ensure_ascii=False)
 
@@ -775,40 +795,59 @@ def _judge_candidate(
     think: bool,
 ) -> bool:
     summary = _candidate_for_prompt(candidate)
+    messages = [
+        {"role": "system", "content": _JUDGE_SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": (
+                f"Patient-ID: {patient_id}, Quartal: {quartal}\n"
+                f"Abrechnende Praxis/Fachgruppe: {practice_fachgruppe or 'unbekannt'}\n"
+                f"Patientenkontext:\n{json.dumps(patient_ctx, ensure_ascii=False)}\n\n"
+                f"Diktat:\n{dictation}\n\n"
+                f"Kandidat:\n{json.dumps(summary, ensure_ascii=False, indent=2)}"
+            ),
+        },
+    ]
     try:
+        # Cap covers thinking tokens + evidence JSON; EOS stops earlier normally.
         response = _chat_with_retry(
             model=model,
-            messages=[
-                {"role": "system", "content": _JUDGE_SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": (
-                        f"Patient-ID: {patient_id}, Quartal: {quartal}\n"
-                        f"Abrechnende Praxis/Fachgruppe: {practice_fachgruppe or 'unbekannt'}\n"
-                        f"Patientenkontext:\n{json.dumps(patient_ctx, ensure_ascii=False)}\n\n"
-                        f"Diktat:\n{dictation}\n\n"
-                        f"Kandidat:\n{json.dumps(summary, ensure_ascii=False, indent=2)}"
-                    ),
-                },
-            ],
-            options={"temperature": 0, "num_predict": 30},
+            messages=messages,
+            options={"temperature": 0, "num_predict": 3072},
             think=think,
         )
+        content = (response.message.content or "").strip()
+        if not content and think:
+            # Thinking consumed the whole budget without a final answer —
+            # fall back to a non-thinking verdict instead of silently rejecting.
+            response = _chat_with_retry(
+                model=model,
+                messages=messages,
+                options={"temperature": 0, "num_predict": 256},
+                think=False,
+            )
+            content = (response.message.content or "").strip()
     except ollama.ResponseError:
         return False
-    return _parse_judge_response((response.message.content or "").strip())
+    return _parse_judge_response(content)
 
 
 def _parse_judge_response(text: str) -> bool:
-    match = re.search(r"\{[^{}]*\}", text, re.DOTALL)
-    if match:
+    """Parse the last valid {"evidence": ..., "select": ...} object.
+
+    select=true only counts with a non-empty evidence quote; everything else
+    (no JSON, malformed, missing evidence) is a rejection.
+    """
+    for match in reversed(list(re.finditer(r"\{[^{}]*\}", text, re.DOTALL))):
         try:
             value = json.loads(match.group())
-            if isinstance(value, dict) and isinstance(value.get("select"), bool):
-                return value["select"]
         except json.JSONDecodeError:
-            pass
-    return bool(re.search(r"\btrue\b", text, re.IGNORECASE))
+            continue
+        if isinstance(value, dict) and isinstance(value.get("select"), bool):
+            if value["select"] and not str(value.get("evidence", "")).strip():
+                return False
+            return value["select"]
+    return False
 
 
 def _resolve_exclusions(selected: list[str], by_gop: dict[str, dict]) -> list[str]:
@@ -843,6 +882,75 @@ def _candidate_exclusions(candidate: dict) -> list[str]:
     details = candidate.get("details") if isinstance(candidate.get("details"), dict) else {}
     exclusions = details.get("ausschluesse", [])
     return [str(e) for e in exclusions] if isinstance(exclusions, list) else []
+
+
+# A GOP whose title declares a dependency on a base GOP, e.g.
+# "Zuschlag zu der Gebührenordnungsposition 03220", "im Zusammenhang mit der
+# Gebührenordnungsposition 37700". The base codes always sit in the title/definition
+# region, before the obligatory-content / billing-notes block.
+_BASIS_TRIGGER = re.compile(r"Zuschlag|im Zusammenhang mit", re.IGNORECASE)
+
+
+def _definition_head(text: str, own_gop: str) -> str:
+    cut = re.search(
+        r"Obligater Leistungsinhalt|Fakultativer Leistungsinhalt|Die Berechnung|"
+        r"Die Geb.hrenordnungsposition\s+" + re.escape(own_gop) + r"\s+ist|"
+        r"Anmerkung|Abrechnungsbestimmung",
+        text,
+        re.IGNORECASE,
+    )
+    return text[: cut.start()] if cut else text[:300]
+
+
+def _candidate_basis_gops(candidate: dict) -> list[str]:
+    """Base GOPs this candidate depends on (Zuschlag / abhängige Pauschale).
+
+    Catalogue-derived and generic: a Zuschlag or "im Zusammenhang mit"-Pauschale
+    can only be billed when at least one of its referenced base GOPs is present.
+    Parsed from the title region only, so exclusion references elsewhere in the
+    text are not mistaken for dependencies.
+    """
+    own = str(candidate.get("gop") or "")
+    details = candidate.get("details") if isinstance(candidate.get("details"), dict) else {}
+    hit = candidate.get("search_hit") if isinstance(candidate.get("search_hit"), dict) else {}
+    text = " ".join(str(details.get("volltext") or details.get("document") or hit.get("document") or "").split())
+    if not text:
+        return []
+    head = _definition_head(text, own)
+    if not _BASIS_TRIGGER.search(head):
+        return []
+    bases: list[str] = []
+    for lo, hi in _GOP_RANGE.findall(head):
+        bases.extend(_expand_gop_range(lo, hi))
+    bases.extend(re.findall(r"\b(\d{5})\b", head))
+    return [b for b in dict.fromkeys(bases) if b != own]
+
+
+def _enforce_base_dependencies(
+    selected: list[str],
+    by_gop: dict[str, dict],
+    available_gops: set[str],
+) -> list[str]:
+    """Drop selected GOPs whose base dependency is unmet.
+
+    A dependent GOP survives only if one of its base GOPs is already billed or
+    itself selected. Iterated to a fixpoint so a dependency on another dropped
+    candidate also propagates. `selected` is in rank order; order is preserved.
+    """
+    survivors = list(selected)
+    changed = True
+    while changed:
+        changed = False
+        available = set(available_gops) | set(survivors)
+        kept = []
+        for gop in survivors:
+            bases = _candidate_basis_gops(by_gop.get(gop, {}))
+            if not bases or any(b in available for b in bases):
+                kept.append(gop)
+            else:
+                changed = True
+        survivors = kept
+    return survivors
 
 
 def _candidate_for_prompt(candidate: dict) -> dict:

@@ -45,6 +45,7 @@ class EvalConfig:
     model: str = "qwen3.5:9b"
     top_k: int = 10
     thinking: bool = False
+    judge_thinking: bool = True  # thinking only for the per-candidate decision step
     practice_fachgruppe: str = "Hausärztlicher Versorgungsbereich"
     reranker_model: str | None = "BAAI/bge-reranker-v2-m3"
     conditions: list[Condition] = field(default_factory=lambda: ["basic", "rag", "agent"])
@@ -117,6 +118,7 @@ def run_condition(
             quartal=case["quartal"],
             model=cfg.model,
             think=cfg.thinking,
+            judge_think=cfg.judge_thinking,
             practice_fachgruppe=cfg.practice_fachgruppe,
             reranker_model=cfg.reranker_model,
             already_billed_gops=case.get("already_billed_gops"),

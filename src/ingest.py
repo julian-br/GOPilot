@@ -42,13 +42,25 @@ _PUNKTE = re.compile(r"(\d+)\s+Punkte")
 # Euro amount on GOP header line: "15,29 €" (used to trim description)
 _EURO = re.compile(r"\s+\d+,\d+\s*€.*$")
 
-# Exclusions in body text — PDF garbles umlauts, so match with dot wildcard:
-# "nicht neben den Geb?hrenordnungspositionen 01100, 01102 ..."
-_AUSSCHLUSS_BLOCK = re.compile(
-    r"nicht neben den Geb.hrenordnungsposition\w*\s+([\d][\d,\s]+)",
+# Exclusions in body text. PDF garbles umlauts (match with dot wildcard) and wraps
+# the phrase across line breaks, so whitespace is normalized before matching. Handles
+# both "nicht neben den" (plural) and "nicht neben der" (singular). Captures the whole
+# sentence up to "berechnungsfähig" so all listed codes — including "X bis Y" ranges —
+# are picked up.
+_AUSSCHLUSS_SENTENCE = re.compile(
+    r"nicht neben (?:den|der) Geb.hrenordnungsposition\w*(.*?)berechnungsf.hig",
     re.IGNORECASE,
 )
 _GOP_NUMBER = re.compile(r"\b(\d{5})\b")
+_GOP_RANGE = re.compile(r"\b(\d{5})\s+bis\s+(\d{5})\b")
+
+
+def _expand_gop_range(lo: str, hi: str, limit: int = 60) -> list[str]:
+    """Expand "XXXXX bis YYYYY" into the contiguous 5-digit codes it covers."""
+    lo_i, hi_i = int(lo), int(hi)
+    if 0 <= hi_i - lo_i <= limit:
+        return [f"{n:05d}" for n in range(lo_i, hi_i + 1)]
+    return [lo, hi]
 
 # Fachgruppe derived from GOP number prefix — more reliable than PDF header parsing.
 _GOP_FACHGRUPPE: dict[str, tuple[str, str]] = {
@@ -166,11 +178,18 @@ def _clean_description(raw: str) -> str:
 
 
 def _extract_exclusions(block_text: str) -> list[str]:
-    """Extract all 5-digit GOP numbers from an exclusion sentence."""
-    exclusions = []
-    for m in _AUSSCHLUSS_BLOCK.finditer(block_text):
-        nums = _GOP_NUMBER.findall(m.group(1))
-        exclusions.extend(nums)
+    """Extract excluded GOP codes from "nicht neben ... berechnungsfähig" sentences.
+
+    Whitespace is normalized first because the phrase frequently wraps across PDF
+    line breaks, and "XXXXX bis YYYYY" ranges are expanded into their codes.
+    """
+    text = " ".join(block_text.split())
+    exclusions: list[str] = []
+    for m in _AUSSCHLUSS_SENTENCE.finditer(text):
+        span = m.group(1)
+        for lo, hi in _GOP_RANGE.findall(span):
+            exclusions.extend(_expand_gop_range(lo, hi))
+        exclusions.extend(_GOP_NUMBER.findall(span))
     return list(dict.fromkeys(exclusions))  # deduplicate, preserve order
 
 
