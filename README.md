@@ -36,6 +36,19 @@ python -m src.fetch_ebm   # re-fetch + re-ingest latest EBM (e.g. quarterly upda
 
 20 hand-annotated GP billing cases (`data/test_dictations/`), scored with per-case F1 against ground-truth GOPs. Predicted codes that are already billed in the quarter are removed before scoring — uniformly in all conditions, mirroring practice management software. Results land in `reports/<experiment>.json`.
 
-Current results (avg F1, 20 cases, 3 runs): **basic 0.10 · RAG 0.33 · agent 0.60** — zero variance across runs (GPU inference at `temperature=0` is deterministic here; verify with `python -m src.eval --runs 3`).
+Current results (avg F1, 20 cases): **basic 0.10 · RAG 0.33 · agent 0.80**. Basic and RAG come from
+`reports/default.json` (3 runs), the agent number from the current pipeline in
+`reports/catalogue-filters.json` (1 run, agent condition only). Basic and RAG use neither the judge
+nor the catalogue filters, so nothing changed for them in between. Zero variance across runs (GPU
+inference at `temperature=0` is deterministic here; verify with `python -m src.eval --runs 3`).
+
+Agent F1 as the decision step was tightened:
+
+| Pipeline stage | Agent F1 |
+|---|---|
+| Bias removed (baseline) | 0.51 |
+| + per-candidate judge, full GOP text, exclusion dedup | 0.60 |
+| + judge thinking, evidence-first | 0.73 |
+| + catalogue rule filters (base-GOP dependency, range exclusions) | **0.80** |
 
 Caveat: the test cases were also used while iterating on prompts and retrieval, so reported numbers are dev-set numbers. An unbiased estimate needs newly written, held-out cases.
