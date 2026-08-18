@@ -3,7 +3,7 @@
 from langchain_core.documents import Document
 
 from src.config import Config
-from src.db.vectors import open_index
+from src.db.vectors import ANY_SPECIALTY, open_index
 from src.ebm import GOP, load_gops
 
 
@@ -17,9 +17,5 @@ def build_index(config: Config | None = None) -> int:
 def _document(gop: GOP) -> Document:
     return Document(
         page_content=gop.embedding_text,
-        metadata={
-            "code": gop.code,
-            "primary_care": gop.billable_in("1"),
-            "specialist": gop.billable_in("2"),
-        },
+        metadata={"code": gop.code, "specialties": list(gop.specialties) or [ANY_SPECIALTY]},
     )

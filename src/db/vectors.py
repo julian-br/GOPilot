@@ -6,6 +6,8 @@ from langchain_ollama import OllamaEmbeddings
 from src.config import Config, load_config
 from src.paths import CHROMA
 
+ANY_SPECIALTY = "*"
+
 
 def open_index(config: Config | None = None) -> Chroma:
     """One collection per embedding model — their vectors have different dimensions."""
@@ -15,3 +17,9 @@ def open_index(config: Config | None = None) -> Chroma:
         embedding_function=OllamaEmbeddings(model=config.embedding_model),
         persist_directory=str(CHROMA),
     )
+
+
+def billable_by(specialty: str) -> dict:
+    """Codes without a specialty list are billable by anyone, so they must be included."""
+    return {"$or": [{"specialties": {"$contains": specialty}},
+                    {"specialties": {"$contains": ANY_SPECIALTY}}]}

@@ -5,18 +5,18 @@ from dataclasses import dataclass
 class GOP:
     """One billing code of the EBM catalogue.
 
-    An empty `care_areas` means the code carries no specialty restriction, so it is
-    billable everywhere — not that it is billable nowhere.
+    An empty `specialties` means the code carries no restriction, so any practice may bill
+    it — not that nobody may.
     """
 
     code: str
     short_text: str
     long_text: str
     obligatory_content: str
-    care_areas: tuple[str, ...]
+    specialties: tuple[str, ...]
 
-    def billable_in(self, care_area: str) -> bool:
-        return not self.care_areas or care_area in self.care_areas
+    def billable_by(self, specialty: str) -> bool:
+        return not self.specialties or specialty in self.specialties
 
     @property
     def embedding_text(self) -> str:

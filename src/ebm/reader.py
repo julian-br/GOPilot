@@ -25,13 +25,14 @@ def _is_wanted(element: ET.Element) -> bool:
 
 
 def _to_gop(element: ET.Element) -> GOP:
-    areas = element.findall("go:bedingung/go:fachgruppe_liste/go:versorgungsbereich", NAMESPACE)
+    specialties = element.findall(
+        "go:bedingung/go:fachgruppe_liste/go:versorgungsbereich/go:fachgruppe", NAMESPACE)
     return GOP(
         code=element.get("V"),
         short_text=_value(element, "go:allgemein/go:legende/go:kurztext"),
         long_text=_value(element, "go:allgemein/go:legende/go:langtext"),
         obligatory_content=_value(element, "go:allgemein/go:leistungsinhalt_obligat"),
-        care_areas=tuple(area.get("V") for area in areas),
+        specialties=tuple(s.get("V") for s in specialties),
     )
 
 
