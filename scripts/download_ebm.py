@@ -6,7 +6,7 @@ import struct
 import urllib.request
 import zipfile
 
-from src.paths import EBM
+from src.paths import EBM, EBM_MASTER
 
 INDEX_URL = "https://update.kbv.de/ita-update/Stammdateien/KBV_Stammdateien/"
 PAYLOAD = "resources/packs/pack-KBV-Stammdateien"
@@ -18,8 +18,8 @@ def main() -> None:
     archive = _largest_zip(payload)
     for name in archive.namelist():
         if name.startswith("850") and name.endswith(".xml"):
-            (EBM / name).write_bytes(archive.read(name))
-            print(f"  {EBM / name}")
+            EBM_MASTER.write_bytes(archive.read(name))
+            print(f"  {EBM_MASTER}")
 
 
 def _jar_url() -> str:

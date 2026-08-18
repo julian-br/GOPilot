@@ -13,11 +13,13 @@ The EBM catalogue comes from the KBV **SDEBM** master data feed, not from the PD
 [update.kbv.de/ita-update/Stammdateien/KBV_Stammdateien/](https://update.kbv.de/ita-update/Stammdateien/KBV_Stammdateien/)
 
 `python setup.py` downloads the installer jar and extracts record type 850 (the nationwide EBM) as
-XML — 3,570 GOPs plus 3,354 regional suffix variants, with points, exclusions, base-service
-dependencies, age limits, quantity limits and the obligatory service content as structured fields.
+XML — 3,570 GOPs (regional suffix variants excluded), with points, exclusions, base-service
+dependencies, age limits and the obligatory service content as structured fields.
 
 The data is free of charge but licensed for use, not redistribution (KBV master data licence, §3).
 It stays out of version control — see `.gitignore`. Only code is published here.
+
+Design decisions are logged in [docs/decisions.md](docs/decisions.md).
 
 ## Setup
 
