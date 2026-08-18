@@ -2,14 +2,13 @@
 
 from langchain_core.documents import Document
 
-from src.config import Config
 from src.db.vectors import ANY_SPECIALTY, open_index
 from src.ebm import GOP, load_gops
 
 
-def build_index(config: Config | None = None) -> int:
+def build_index(embedding_model: str) -> int:
     gops = load_gops()
-    index = open_index(config)
+    index = open_index(embedding_model)
     index.add_documents([_document(g) for g in gops], ids=[g.code for g in gops])
     return len(gops)
 

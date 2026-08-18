@@ -52,3 +52,6 @@ reports/
 
 # KBV master data: licensed for use, not redistribution
 data/ebm/
+# MLflow: runs, artifacts and the tracking database
+mlruns/
+mlflow.db

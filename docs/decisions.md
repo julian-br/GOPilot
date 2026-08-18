@@ -24,3 +24,10 @@ They must return: the conditions are nowhere in the prose.
 cosine similarity 1.0, so no embedding can separate them. The specialty lists do, and they never
 overlap. Codes without a list are billable by anyone and carry `["*"]`, so every filter needs the
 `$or` (see `billable_by`).
+
+**007 — MLflow for experiment tracking, metrics computed ourselves** (2026-08-18)
+Runs locally against a file store and records the git commit and branch by itself. LangSmith and
+Langfuse were ruled out — the first is hosted and the master data licence forbids redistribution,
+the second needs four services to self-host. MLflow's own retrieval metrics are deprecated in
+favour of LLM-judged scoring, so recall stays a few lines of our own code: exact, deterministic
+and free, which LLM-judged metrics are not.
