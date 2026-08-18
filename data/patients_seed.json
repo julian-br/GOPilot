@@ -1,0 +1,122 @@
+{
+  "patients": [
+    {
+      "id": "P001",
+      "name": "Müller, Hans",
+      "birth_year": 1959,
+      "gender": "M",
+      "insurance": "AOK Bayern",
+      "conditions": "Diabetes mellitus Typ 2; arterielle Hypertonie"
+    },
+    {
+      "id": "P002",
+      "name": "Schmidt, Anna",
+      "birth_year": 1992,
+      "gender": "F",
+      "insurance": "TK",
+      "conditions": ""
+    },
+    {
+      "id": "P003",
+      "name": "Weber, Erika",
+      "birth_year": 1948,
+      "gender": "F",
+      "insurance": "Barmer",
+      "conditions": "COPD; Herzinsuffizienz; arterielle Hypertonie"
+    },
+    {
+      "id": "P004",
+      "name": "Becker, Thomas",
+      "birth_year": 1976,
+      "gender": "M",
+      "insurance": "DAK-Gesundheit",
+      "conditions": ""
+    },
+    {
+      "id": "P005",
+      "name": "Kaya, Leyla",
+      "birth_year": 1985,
+      "gender": "F",
+      "insurance": "AOK Nordost",
+      "conditions": "Asthma bronchiale"
+    },
+    {
+      "id": "P006",
+      "name": "Sommer, Karl",
+      "birth_year": 1948,
+      "gender": "M",
+      "insurance": "KNAPPSCHAFT",
+      "conditions": "Herzrhythmusstörungen; koronare Herzkrankheit"
+    },
+    {
+      "id": "P007",
+      "name": "Fischer, Marie",
+      "birth_year": 2005,
+      "gender": "F",
+      "insurance": "BKK Freudenberg",
+      "conditions": ""
+    }
+  ],
+  "billed": [
+    {
+      "patient_id": "P001",
+      "quarter": "2/2026",
+      "gop": "03000"
+    },
+    {
+      "patient_id": "P001",
+      "quarter": "2/2026",
+      "gop": "03220"
+    },
+    {
+      "patient_id": "P001",
+      "quarter": "4/2026",
+      "gop": "03000"
+    },
+    {
+      "patient_id": "P001",
+      "quarter": "4/2026",
+      "gop": "03220"
+    },
+    {
+      "patient_id": "P002",
+      "quarter": "2/2026",
+      "gop": "03000"
+    },
+    {
+      "patient_id": "P002",
+      "quarter": "3/2026",
+      "gop": "03000"
+    },
+    {
+      "patient_id": "P003",
+      "quarter": "2/2026",
+      "gop": "03000"
+    },
+    {
+      "patient_id": "P003",
+      "quarter": "4/2026",
+      "gop": "03000"
+    },
+    {
+      "patient_id": "P003",
+      "quarter": "4/2026",
+      "gop": "03220"
+    },
+    {
+      "patient_id": "P004",
+      "quarter": "2/2026",
+      "gop": "03000"
+    },
+    {
+      "patient_id": "P005",
+      "quarter": "3/2026",
+      "gop": "03000"
+    },
+    {
+      "patient_id": "P005",
+      "quarter": "3/2026",
+      "gop": "03220"
+    }
+  ]
+}

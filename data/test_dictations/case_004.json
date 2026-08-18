@@ -2,7 +2,6 @@
   "case_id": "case_004",
   "patient_id": "P002",
   "quartal": "2/2026",
-  "already_billed_gops": ["03000"],
   "scenario": "Kurzer Verlaufskontrolltermin im selben Quartal ohne neue abrechenbare Leistung",
   "dictation": "Frau Schmidt, 34 Jahre. Kurzer persönlicher Kontrolltermin nach Angina. Beschwerden vollständig abgeklungen, Rachen reizlos, kein Fieber. Keine Laboruntersuchung, keine Prozedur, keine Verordnung und keine Bescheinigung. Patientin ist arbeitsfähig.",
   "procedures": [

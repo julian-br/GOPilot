@@ -2,13 +2,15 @@
   "case_id": "case_006",
   "patient_id": "P003",
   "quartal": "2/2026",
-  "already_billed_gops": ["03000"],
   "scenario": "Komplexer Hausarztbesuch mit Spirometrie und intravenöser Infusion",
   "dictation": "Frau Weber, 78 Jahre. Persönlicher Hausarzttermin wegen akuter Verschlechterung der Luftnot bei bekannter COPD. Die Versichertenpauschale ist in diesem Quartal bereits abgerechnet. Körperliche Untersuchung mit RR 168/98 und Herzfrequenz 112. Spirographische Untersuchung durchgeführt mit Darstellung der Flussvolumenkurve, in- und exspiratorischen Messungen und graphischer Registrierung; FEV1/FVC 0,61. Zusätzlich Infusion Furosemid 40 mg intravenös über 20 Minuten angelegt, Patientin stabilisiert.",
   "procedures": [
     "Spirographische Untersuchung",
     "Intravenöse Infusion"
   ],
-  "expected_gops": ["03330", "02100"],
+  "expected_gops": [
+    "03330",
+    "02100"
+  ],
   "notes": "03000 ist bereits abgerechnet. 03330 ist durch Flussvolumenkurve, in-/exspiratorische Messungen und Registrierung dokumentiert. 02100 ist durch intravenöse Infusion dokumentiert."
 }
