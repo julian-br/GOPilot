@@ -1,20 +1,26 @@
-"""Fill the vector store with the EBM catalogue."""
+"""The EBM catalogue as documents, and the vector index built from them."""
 
 from langchain_core.documents import Document
 
-from src.db.vectors import ANY_SPECIALTY, open_index
-from src.ebm import GOP, load_gops
+from src.db.vectors import open_store
+from src.ebm import load_gops
 
 
 def build_index(embedding_model: str) -> int:
-    gops = load_gops()
-    index = open_index(embedding_model)
-    index.add_documents([_document(g) for g in gops], ids=[g.code for g in gops])
-    return len(gops)
+    docs = documents()
+    store = open_store(embedding_model, force_recreate=True)
+    try:
+        store.add_documents(docs)
+    finally:
+        store.client.close()
+    return len(docs)
 
 
-def _document(gop: GOP) -> Document:
-    return Document(
-        page_content=gop.embedding_text,
-        metadata={"code": gop.code, "specialties": list(gop.specialties) or [ANY_SPECIALTY]},
-    )
+def documents() -> list[Document]:
+    return [
+        Document(
+            page_content=gop.embedding_text,
+            metadata={"code": gop.code, "specialties": list(gop.specialties)},
+        )
+        for gop in load_gops()
+    ]
