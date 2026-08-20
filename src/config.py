@@ -13,6 +13,8 @@ DEFAULT_CONFIG = ROOT / "configs" / "default.yaml"
 class Config:
     experiment: str
     embedding_model: str
+    llm_provider: str
+    llm_model: str
     practice_specialty: str
     retriever: RetrieverName
     top_k: int

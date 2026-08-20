@@ -39,3 +39,9 @@ retrieval, but sparse indexes are not available in the local embedded setup. Qdr
 in-process without Docker, persists on disk, and exposes LangChain-native dense, sparse and hybrid
 retrieval modes. The sparse side uses FastEmbed's BM25 with German stemming, stored as a Qdrant
 sparse vector with IDF weighting; dense and sparse candidates are fused with Qdrant's RRF.
+
+**009 — Generation behind a small model client** (2026-08-20)
+LLM calls are isolated behind `src.generation.client.open_chat_model`, with prompts and structured
+output schemas in separate modules. The first provider is local Ollama, using `qwen3:4b`, but the
+recommendation code receives a LangChain chat model so cloud providers can be swapped in later.
+Initial evaluation measures the LLM without retrieval as a baseline.
