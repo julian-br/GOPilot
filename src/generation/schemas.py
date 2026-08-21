@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from pydantic import BaseModel, Field
 
 
@@ -10,3 +12,9 @@ class RecommendationResult(BaseModel):
     recommendations: list[Recommendation] = Field(
         description="Recommended EBM GOP billing codes"
     )
+
+
+@dataclass(frozen=True)
+class RecommendationRun:
+    result: RecommendationResult
+    reasoning: str | None

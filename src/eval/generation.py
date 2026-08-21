@@ -1,14 +1,17 @@
 """How well does the LLM alone recommend expected GOPs?"""
 
+import argparse
 from dataclasses import asdict
+from time import perf_counter
 from typing import Any
 
 import mlflow
+import mlflow.langchain
 
 from src.config import Config, load_config
 from src.db import get_patient
 from src.eval.cases import Case, load_cases
-from src.generation import open_chat_model, recommend_without_retrieval
+from src.generation.predictors import Predictor, build_predictor
 
 CUTOFFS = (1, 5, 10)
 
@@ -16,25 +19,43 @@ CaseResults = dict[str, dict[str, Any]]
 Ranks = dict[str, dict[str, int | None]]
 
 
-def evaluate_cases(config: Config, cases: list[Case]) -> CaseResults:
-    model = open_chat_model(config.llm_provider, config.llm_model)
+def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
     results = {}
-    for case in cases:
-        patient = get_patient(case.patient_id, case.quarter)
-        result = recommend_without_retrieval(model, case.dictation, patient)
-        predictions = [
-            {"rank": i, "code": r.code, "reason": r.reason}
-            for i, r in enumerate(result.recommendations, 1)
-        ]
-        predicted = {p["code"] for p in predictions}
-        expected = set(case.expected)
-        results[case.case_id] = {
-            "expected": list(case.expected),
-            "predicted": predictions,
-            "true_positive": [code for code in case.expected if code in predicted],
-            "false_positive": [p["code"] for p in predictions if p["code"] not in expected],
-            "false_negative": [code for code in case.expected if code not in predicted],
-        }
+    for index, case in enumerate(cases, 1):
+        start = perf_counter()
+        with mlflow.start_span(
+            "generation_case",
+            attributes={
+                "case_id": case.case_id,
+                "case_index": index,
+                "cases": len(cases),
+                "patient_id": case.patient_id,
+                "quarter": case.quarter,
+                "expected": list(case.expected),
+            },
+        ) as span:
+            patient = get_patient(case.patient_id, case.quarter)
+            run = predictor.predict(case.dictation, patient)
+            predictions = [
+                {"rank": i, "code": r.code, "reason": r.reason}
+                for i, r in enumerate(run.result.recommendations, 1)
+            ]
+            predicted = {p["code"] for p in predictions}
+            expected = set(case.expected)
+            case_result = {
+                "expected": list(case.expected),
+                "predicted": predictions,
+                "true_positive": [code for code in case.expected if code in predicted],
+                "false_positive": [
+                    p["code"] for p in predictions if p["code"] not in expected
+                ],
+                "false_negative": [code for code in case.expected if code not in predicted],
+            }
+            elapsed = perf_counter() - start
+            span.set_outputs(case_result)
+            span.set_attribute("duration_seconds", elapsed)
+            results[case.case_id] = case_result
+        print(f"[{index}/{len(cases)}] {case.case_id} {elapsed:.1f}s", flush=True)
     return results
 
 
@@ -68,16 +89,22 @@ def classification_metrics(results: CaseResults) -> dict[str, float]:
     }
 
 
-def main(config: Config) -> dict[str, float]:
-    cases = load_cases()
-    results = evaluate_cases(config, cases)
-    ranks = ranks_per_case(results)
-    metrics = classification_metrics(results) | {
-        f"llm_recall_at_{k}": recall_at(ranks, k) for k in CUTOFFS
-    }
-
+def main(config: Config, limit: int | None = None) -> dict[str, float]:
     with mlflow.start_run(run_name=config.experiment):
+        mlflow.langchain.autolog(log_traces=True)
         mlflow.log_params(asdict(config))
+        mlflow.log_dict(asdict(config), "config.json")
+
+        cases = load_cases()
+        if limit is not None:
+            cases = cases[:limit]
+        predictor = build_predictor(config)
+        results = evaluate_cases(predictor, cases)
+        ranks = ranks_per_case(results)
+        metrics = classification_metrics(results) | {
+            f"llm_recall_at_{k}": recall_at(ranks, k) for k in CUTOFFS
+        }
+
         mlflow.log_param("cases", len(cases))
         mlflow.log_param(
             "cases_with_expected", sum(1 for case in cases if case.expected)
@@ -88,6 +115,13 @@ def main(config: Config) -> dict[str, float]:
     return metrics
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--limit", type=int)
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    for name, value in main(load_config()).items():
+    args = parse_args()
+    for name, value in main(load_config(), limit=args.limit).items():
         print(f"  {name:<16} {value:.3f}")
