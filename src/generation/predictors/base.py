@@ -7,3 +7,6 @@ from src.generation.schemas import RecommendationRun
 class Predictor(Protocol):
     def predict(self, dictation: str, patient: Patient | None) -> RecommendationRun:
         ...
+
+    def close(self) -> None:
+        ...

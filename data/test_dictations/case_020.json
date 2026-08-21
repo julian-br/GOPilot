@@ -9,8 +9,7 @@
     "Intravenöse Infusion"
   ],
   "expected_gops": [
-    "01410",
-    "02100"
+    "01410"
   ],
-  "notes": "01410 für den Hausbesuch in der eigenen Häuslichkeit; auch beim zweiten Kontakt im Quartal abrechenbar, da es sich um einen eigenständigen Hausbesuch handelt. 02100 für die intravenöse Infusion über 20 Minuten. 03000 und 03220 sind bereits abgerechnet."
+  "notes": "01410 für den Hausbesuch in der eigenen Häuslichkeit; auch beim zweiten Kontakt im Quartal abrechenbar, da es sich um einen eigenständigen Hausbesuch handelt. Die Infusion ist in der hausärztlichen Regelversorgung nicht gesondert berechnungsfähig. 03000 und 03220 sind bereits abgerechnet."
 }

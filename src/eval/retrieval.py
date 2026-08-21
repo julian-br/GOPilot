@@ -31,6 +31,7 @@ def recall_at(ranks: Ranks, k: int) -> float:
 
 
 def main(config: Config) -> dict[str, float]:
+    mlflow.set_experiment(config.experiment)
     cases = [c for c in load_cases() if c.expected]
     store = open_store(config.embedding_model, config.retriever)
     try:
@@ -40,7 +41,8 @@ def main(config: Config) -> dict[str, float]:
         ranks = ranks_per_case(retriever, cases, max(cutoffs))
         metrics = {f"recall_at_{k}": recall_at(ranks, k) for k in cutoffs}
 
-        with mlflow.start_run(run_name=config.experiment):
+        run_name = f"retrieval-{config.retriever}-{config.embedding_model}"
+        with mlflow.start_run(run_name=run_name):
             mlflow.log_params(asdict(config))
             mlflow.log_param("cases", len(cases))
             mlflow.log_metrics(metrics)

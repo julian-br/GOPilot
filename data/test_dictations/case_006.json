@@ -9,8 +9,7 @@
     "Intravenöse Infusion"
   ],
   "expected_gops": [
-    "03330",
-    "02100"
+    "03330"
   ],
-  "notes": "03000 ist bereits abgerechnet. 03330 ist durch Flussvolumenkurve, in-/exspiratorische Messungen und Registrierung dokumentiert. 02100 ist durch intravenöse Infusion dokumentiert."
+  "notes": "03000 ist bereits abgerechnet. 03330 ist durch Flussvolumenkurve, in-/exspiratorische Messungen und Registrierung dokumentiert. Die Infusion ist in der hausärztlichen Regelversorgung nicht gesondert berechnungsfähig."
 }

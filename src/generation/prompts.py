@@ -16,3 +16,21 @@ BILLING_WITHOUT_RETRIEVAL_PROMPT = ChatPromptTemplate.from_messages(
         ),
     ]
 )
+
+RAG_BILLING_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "Du empfiehlst EBM-GOP-Abrechnungsziffern fuer eine deutsche Arztpraxis. "
+            "Waehle ausschliesslich GOP-Ziffern aus den bereitgestellten Kandidaten. "
+            "Denke auch an Pauschalen, wenn Patientenkontakt, Quartalsstatus und Kontext dafuer sprechen. "
+            "Erfinde keine Leistungen, Diagnosen, Befunde oder GOP-Ziffern. "
+            "Wenn kein Kandidat eindeutig passt, gib keine Empfehlung zurueck. "
+            "Begruende jede gewaehlte Ziffer kurz.",
+        ),
+        (
+            "human",
+            "Diktat:\n{dictation}\n\nPatientenkontext:\n{patient_context}\n\nKandidaten:\n{candidates}",
+        ),
+    ]
+)

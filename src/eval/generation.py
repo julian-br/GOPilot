@@ -1,4 +1,4 @@
-"""How well does the LLM alone recommend expected GOPs?"""
+"""How well does a generation strategy recommend expected GOPs?"""
 
 import argparse
 from dataclasses import asdict
@@ -7,16 +7,14 @@ from typing import Any
 
 import mlflow
 import mlflow.langchain
+from mlflow.entities import SpanStatusCode
 
 from src.config import Config, load_config
 from src.db import get_patient
 from src.eval.cases import Case, load_cases
 from src.generation.predictors import Predictor, build_predictor
 
-CUTOFFS = (1, 5, 10)
-
 CaseResults = dict[str, dict[str, Any]]
-Ranks = dict[str, dict[str, int | None]]
 
 
 def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
@@ -34,12 +32,20 @@ def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
                 "expected": list(case.expected),
             },
         ) as span:
-            patient = get_patient(case.patient_id, case.quarter)
-            run = predictor.predict(case.dictation, patient)
-            predictions = [
-                {"rank": i, "code": r.code, "reason": r.reason}
-                for i, r in enumerate(run.result.recommendations, 1)
-            ]
+            error = None
+            try:
+                patient = get_patient(case.patient_id, case.quarter)
+                run = predictor.predict(case.dictation, patient)
+                predictions = [
+                    {"rank": i, "code": r.code, "reason": r.reason}
+                    for i, r in enumerate(run.result.recommendations, 1)
+                ]
+            except Exception as exc:
+                predictions = []
+                error = f"{type(exc).__name__}: {exc}"
+                span.record_exception(exc)
+                span.set_status(SpanStatusCode.ERROR)
+
             predicted = {p["code"] for p in predictions}
             expected = set(case.expected)
             case_result = {
@@ -51,27 +57,18 @@ def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
                 ],
                 "false_negative": [code for code in case.expected if code not in predicted],
             }
+            if error is not None:
+                case_result["error"] = error
             elapsed = perf_counter() - start
             span.set_outputs(case_result)
             span.set_attribute("duration_seconds", elapsed)
             results[case.case_id] = case_result
-        print(f"[{index}/{len(cases)}] {case.case_id} {elapsed:.1f}s", flush=True)
+        status = " ERROR" if error is not None else ""
+        print(
+            f"[{index}/{len(cases)}] {case.case_id} {elapsed:.1f}s{status}",
+            flush=True,
+        )
     return results
-
-
-def ranks_per_case(results: CaseResults) -> Ranks:
-    ranks = {}
-    for case_id, result in results.items():
-        position = {p["code"]: p["rank"] for p in result["predicted"]}
-        ranks[case_id] = {code: position.get(code) for code in result["expected"]}
-    return ranks
-
-
-def recall_at(ranks: Ranks, k: int) -> float:
-    expected = [r for case in ranks.values() for r in case.values()]
-    if not expected:
-        return 0.0
-    return sum(1 for r in expected if r is not None and r <= k) / len(expected)
 
 
 def classification_metrics(results: CaseResults) -> dict[str, float]:
@@ -83,14 +80,16 @@ def classification_metrics(results: CaseResults) -> dict[str, float]:
     recall = tp / (tp + fn) if tp + fn else 0.0
     f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
     return {
-        "llm_precision": precision,
-        "llm_recall": recall,
-        "llm_f1": f1,
+        "generation_precision": precision,
+        "generation_recall": recall,
+        "generation_f1": f1,
     }
 
 
 def main(config: Config, limit: int | None = None) -> dict[str, float]:
-    with mlflow.start_run(run_name=config.experiment):
+    mlflow.set_experiment(config.experiment)
+    run_name = f"{config.generation_strategy}-{config.llm_model}"
+    with mlflow.start_run(run_name=run_name):
         mlflow.langchain.autolog(log_traces=True)
         mlflow.log_params(asdict(config))
         mlflow.log_dict(asdict(config), "config.json")
@@ -99,10 +98,13 @@ def main(config: Config, limit: int | None = None) -> dict[str, float]:
         if limit is not None:
             cases = cases[:limit]
         predictor = build_predictor(config)
-        results = evaluate_cases(predictor, cases)
-        ranks = ranks_per_case(results)
+        try:
+            results = evaluate_cases(predictor, cases)
+        finally:
+            predictor.close()
+        errors = sum("error" in result for result in results.values())
         metrics = classification_metrics(results) | {
-            f"llm_recall_at_{k}": recall_at(ranks, k) for k in CUTOFFS
+            "generation_error_rate": errors / len(results) if results else 0.0
         }
 
         mlflow.log_param("cases", len(cases))
@@ -110,8 +112,7 @@ def main(config: Config, limit: int | None = None) -> dict[str, float]:
             "cases_with_expected", sum(1 for case in cases if case.expected)
         )
         mlflow.log_metrics(metrics)
-        mlflow.log_dict(results, "llm_cases.json")
-        mlflow.log_dict(ranks, "llm_ranks.json")
+        mlflow.log_dict(results, "generation_cases.json")
     return metrics
 
 
