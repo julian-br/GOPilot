@@ -6,7 +6,8 @@ from src.db.vectors import collection_quarter, open_store
 from src.ebm import load_gops, load_quarter
 
 
-def build_index(embedding_model: str, collection_name: str) -> int:
+def build_index(collection_name: str) -> int:
+    """Replace a validated EBM collection with the currently downloaded catalogue."""
     quarter = collection_quarter(collection_name)
     source_quarter = load_quarter()
     if quarter != source_quarter:
@@ -14,7 +15,7 @@ def build_index(embedding_model: str, collection_name: str) -> int:
             f"collection quarter {quarter} does not match EBM source {source_quarter}"
         )
     docs = documents(quarter)
-    store = open_store(embedding_model, collection_name, force_recreate=True)
+    store = open_store(collection_name, force_recreate=True)
     try:
         store.add_documents(docs)
     finally:

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from typing import TYPE_CHECKING
 
 from langchain_core.documents import Document
@@ -10,6 +9,7 @@ from langchain_ollama import OllamaEmbeddings
 from langchain_qdrant import FastEmbedSparse, QdrantVectorStore, RetrievalMode
 from qdrant_client import QdrantClient, models
 
+from src.ebm.version import collection_quarter
 from src.paths import FASTEMBED, QDRANT
 
 if TYPE_CHECKING:
@@ -20,11 +20,11 @@ RETRIEVAL_MODES: dict[RetrieverName, RetrievalMode] = {
     "sparse": RetrievalMode.SPARSE,
     "hybrid": RetrievalMode.HYBRID,
 }
-COLLECTION_PATTERN = re.compile(r"^ebm_(\d{4})_q([1-4])(?:_|$)")
+
+EMBEDDING_MODEL = "qwen3-embedding:4b"
 
 
 def open_store(
-    embedding_model: str,
     collection_name: str,
     retriever: RetrieverName = "hybrid",
     force_recreate: bool = False,
@@ -38,7 +38,7 @@ def open_store(
                 raise ValueError(f"Qdrant collection {collection_name!r} does not exist")
         finally:
             client.close()
-    embedding = OllamaEmbeddings(model=embedding_model)
+    embedding = OllamaEmbeddings(model=EMBEDDING_MODEL)
     sparse_embedding = FastEmbedSparse(
         model_name="Qdrant/bm25",
         cache_dir=str(FASTEMBED),
@@ -74,16 +74,6 @@ def open_store(
         metadata_payload_key=store.metadata_payload_key,
         validate_collection_config=False,
     )
-
-
-def collection_quarter(collection_name: str) -> str:
-    match = COLLECTION_PATTERN.match(collection_name)
-    if match is None:
-        raise ValueError(
-            f"invalid EBM collection {collection_name!r}; expected ebm_<year>_q<1-4>"
-        )
-    year, quarter = match.groups()
-    return f"{quarter}/{year}"
 
 
 def billable_filter(specialty: str) -> models.Filter:

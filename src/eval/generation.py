@@ -9,8 +9,8 @@ import mlflow
 import mlflow.langchain
 from mlflow.entities import SpanStatusCode
 
-from src.config import DEFAULT_CONFIG, Config, load_config
-from src.eval.cases import Case, load_cases
+from src.config import DEFAULT_CONFIG, Config, RetrievalConfig, load_config
+from src.eval.cases import Case, load_cases, require_catalogue_quarter
 from src.generation.predictors import Predictor, build_predictor
 
 CaseResults = dict[str, dict[str, Any]]
@@ -87,10 +87,17 @@ def classification_metrics(results: CaseResults) -> dict[str, float]:
 
 
 def main(config: Config, limit: int | None = None) -> dict[str, float]:
+    cases = load_cases()
+    if limit is not None:
+        cases = cases[:limit]
+    require_catalogue_quarter(cases, config.catalogue_quarter)
+
     mlflow.set_experiment(config.experiment)
     strategy = (
         "rag-rerank"
-        if config.generation_strategy == "rag" and config.reranker
+        if isinstance(config, RetrievalConfig)
+        and config.generation_strategy == "rag"
+        and config.reranker
         else config.generation_strategy
     )
     run_name = f"{strategy}-{config.llm_model}"
@@ -100,9 +107,6 @@ def main(config: Config, limit: int | None = None) -> dict[str, float]:
         mlflow.log_params(config_values)
         mlflow.log_dict(config_values, "config.json")
 
-        cases = load_cases()
-        if limit is not None:
-            cases = cases[:limit]
         predictor = build_predictor(config)
         try:
             results = evaluate_cases(predictor, cases)

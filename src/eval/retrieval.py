@@ -6,9 +6,9 @@ from pathlib import Path
 import mlflow
 from langchain_core.retrievers import BaseRetriever
 
-from src.config import DEFAULT_CONFIG, Config, load_config
+from src.config import DEFAULT_CONFIG, Config, RetrievalConfig, load_config
 from src.db import open_store
-from src.eval.cases import Case, load_cases
+from src.eval.cases import Case, load_cases, require_catalogue_quarter
 from src.retrieval import build_retriever
 
 CUTOFFS = (1, 5, 10, 20, 50)
@@ -32,13 +32,13 @@ def recall_at(ranks: Ranks, k: int) -> float:
 
 
 def main(config: Config) -> dict[str, float]:
-    if config.top_k is None:
-        raise ValueError("top_k is required for retrieval evaluation")
+    if not isinstance(config, RetrievalConfig):
+        raise ValueError("retrieval evaluation requires a rag or agent configuration")
 
     mlflow.set_experiment(config.experiment)
     cases = [c for c in load_cases() if c.expected]
+    require_catalogue_quarter(cases, config.catalogue_quarter)
     store = open_store(
-        config.embedding_model,
         config.ebm_collection,
         config.retriever,
     )
@@ -55,7 +55,7 @@ def main(config: Config) -> dict[str, float]:
         metrics = {f"recall_at_{k}": recall_at(ranks, k) for k in cutoffs}
 
         reranker = "-rerank" if config.reranker else ""
-        run_name = f"retrieval-{config.retriever}{reranker}-{config.embedding_model}"
+        run_name = f"retrieval-{config.retriever}{reranker}"
         with mlflow.start_run(run_name=run_name):
             mlflow.log_params(config.model_dump())
             mlflow.log_param("cases", len(cases))

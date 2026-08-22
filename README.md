@@ -4,8 +4,9 @@ GOPilot is a local AI assistant for EBM billing code recommendation in German GP
 doctor's dictation and patient context, it recommends GOP (Gebührenordnungsposition) codes from the
 EBM catalogue.
 
-Built for research and evaluation, not production use. Currently being rebuilt from scratch — this
-README grows back as the pipeline does.
+GOPilot is an exploratory research project for understanding how local language models and EBM
+catalogue retrieval can support billing-code recommendations. It is intended for experimentation
+and evaluation, not production use.
 
 ## Data source
 
@@ -17,7 +18,9 @@ XML — 3,570 GOPs (regional suffix variants excluded), with points, exclusions,
 dependencies, age limits and the obligatory service content as structured fields.
 
 Setup writes the catalogue to the versioned Qdrant collection configured by `ebm_collection`.
-Runtime derives the catalogue quarter from that collection name and never accesses the source XML.
+RAG and agent runs derive their catalogue quarter from the collection name (for example,
+`ebm_2026_q4`); `no_rag` declares it explicitly. The embedding model is intentionally fixed in
+code, while `no_rag` needs no vector-store settings.
 
 Design decisions are logged in [docs/decisions.md](docs/decisions.md).
 
