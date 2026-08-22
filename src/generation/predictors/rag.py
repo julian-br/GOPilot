@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from typing import Callable
 
-import mlflow
 from langchain_core.documents import Document
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.retrievers import BaseRetriever
-from mlflow.entities import SpanType
+from langchain_core.runnables import RunnableLambda
 
 from src.db.patients import Patient
 from src.generation.prompt_inputs import format_patient_context
@@ -21,27 +20,19 @@ class RagPredictor:
 
     def predict(self, dictation: str, patient: Patient | None) -> RecommendationRun:
         candidates = self.retriever.invoke(dictation)
-        chain = RAG_BILLING_PROMPT | self.model.with_structured_output(
-            RecommendationResult, include_raw=True
-        )
-        result = chain.invoke(
+        chain = (
+            RAG_BILLING_PROMPT
+            | self.model.with_structured_output(
+                RecommendationResult, include_raw=True
+            )
+            | RunnableLambda(RecommendationRun.from_output)
+        ).with_config({"run_name": "recommendation"})
+        return chain.invoke(
             {
                 "dictation": dictation,
                 "patient_context": format_patient_context(patient),
                 "candidates": _candidate_context(candidates),
             }
-        )
-        if result["parsing_error"] is not None:
-            raise result["parsing_error"]
-
-        reasoning = result["raw"].additional_kwargs.get("reasoning_content")
-        if reasoning:
-            with mlflow.start_span("model_reasoning", span_type=SpanType.LLM) as span:
-                span.set_outputs(reasoning)
-
-        return RecommendationRun(
-            result=result["parsed"],
-            reasoning=reasoning,
         )
 
     def close(self) -> None:
@@ -50,6 +41,6 @@ class RagPredictor:
 
 def _candidate_context(candidates: list[Document]) -> str:
     return "\n\n".join(
-        f"{rank}. GOP {candidate.metadata['code']}\n{candidate.page_content}"
-        for rank, candidate in enumerate(candidates, 1)
+        f"{candidate.metadata['code']}\n{candidate.page_content}"
+        for candidate in candidates
     )

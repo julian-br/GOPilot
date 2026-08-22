@@ -17,7 +17,16 @@ def build_predictor(config: "Config") -> Predictor:
         return NoRagPredictor(model)
     if config.generation_strategy == "rag":
         store = open_store(config.embedding_model, config.retriever)
-        retriever = build_retriever(store, config.practice_specialty, config.top_k)
+        try:
+            retriever = build_retriever(
+                store,
+                config.practice_specialty,
+                config.top_k,
+                config.reranker,
+            )
+        except Exception:
+            store.client.close()
+            raise
         return RagPredictor(model, retriever, store.client.close)
     if config.generation_strategy == "agent":
         raise NotImplementedError(

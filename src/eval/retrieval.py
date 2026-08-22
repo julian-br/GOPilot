@@ -1,11 +1,12 @@
 """How well does retrieval alone surface the expected GOPs?"""
 
-from dataclasses import asdict
+import argparse
+from pathlib import Path
 
 import mlflow
 from langchain_core.retrievers import BaseRetriever
 
-from src.config import Config, load_config
+from src.config import DEFAULT_CONFIG, Config, load_config
 from src.db import open_store
 from src.eval.cases import Case, load_cases
 from src.retrieval import build_retriever
@@ -31,19 +32,28 @@ def recall_at(ranks: Ranks, k: int) -> float:
 
 
 def main(config: Config) -> dict[str, float]:
+    if config.top_k is None:
+        raise ValueError("top_k is required for retrieval evaluation")
+
     mlflow.set_experiment(config.experiment)
     cases = [c for c in load_cases() if c.expected]
     store = open_store(config.embedding_model, config.retriever)
     try:
         cutoffs = tuple(sorted({*CUTOFFS, config.top_k}))
-        retriever = build_retriever(store, config.practice_specialty, max(cutoffs))
+        retriever = build_retriever(
+            store,
+            config.practice_specialty,
+            max(cutoffs),
+            config.reranker,
+        )
 
         ranks = ranks_per_case(retriever, cases, max(cutoffs))
         metrics = {f"recall_at_{k}": recall_at(ranks, k) for k in cutoffs}
 
-        run_name = f"retrieval-{config.retriever}-{config.embedding_model}"
+        reranker = "-rerank" if config.reranker else ""
+        run_name = f"retrieval-{config.retriever}{reranker}-{config.embedding_model}"
         with mlflow.start_run(run_name=run_name):
-            mlflow.log_params(asdict(config))
+            mlflow.log_params(config.model_dump())
             mlflow.log_param("cases", len(cases))
             mlflow.log_metrics(metrics)
             mlflow.log_dict(ranks, "ranks.json")
@@ -52,6 +62,13 @@ def main(config: Config) -> dict[str, float]:
         store.client.close()
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    for name, value in main(load_config()).items():
+    args = parse_args()
+    for name, value in main(load_config(args.config)).items():
         print(f"  {name:<12} {value:.3f}")

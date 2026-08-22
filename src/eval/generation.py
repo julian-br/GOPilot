@@ -1,7 +1,7 @@
 """How well does a generation strategy recommend expected GOPs?"""
 
 import argparse
-from dataclasses import asdict
+from pathlib import Path
 from time import perf_counter
 from typing import Any
 
@@ -9,7 +9,7 @@ import mlflow
 import mlflow.langchain
 from mlflow.entities import SpanStatusCode
 
-from src.config import Config, load_config
+from src.config import DEFAULT_CONFIG, Config, load_config
 from src.db import get_patient
 from src.eval.cases import Case, load_cases
 from src.generation.predictors import Predictor, build_predictor
@@ -33,9 +33,11 @@ def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
             },
         ) as span:
             error = None
+            reasoning = None
             try:
                 patient = get_patient(case.patient_id, case.quarter)
                 run = predictor.predict(case.dictation, patient)
+                reasoning = run.reasoning
                 predictions = [
                     {"rank": i, "code": r.code, "reason": r.reason}
                     for i, r in enumerate(run.result.recommendations, 1)
@@ -51,6 +53,7 @@ def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
             case_result = {
                 "expected": list(case.expected),
                 "predicted": predictions,
+                "reasoning": reasoning,
                 "true_positive": [code for code in case.expected if code in predicted],
                 "false_positive": [
                     p["code"] for p in predictions if p["code"] not in expected
@@ -88,11 +91,17 @@ def classification_metrics(results: CaseResults) -> dict[str, float]:
 
 def main(config: Config, limit: int | None = None) -> dict[str, float]:
     mlflow.set_experiment(config.experiment)
-    run_name = f"{config.generation_strategy}-{config.llm_model}"
+    strategy = (
+        "rag-rerank"
+        if config.generation_strategy == "rag" and config.reranker
+        else config.generation_strategy
+    )
+    run_name = f"{strategy}-{config.llm_model}"
     with mlflow.start_run(run_name=run_name):
         mlflow.langchain.autolog(log_traces=True)
-        mlflow.log_params(asdict(config))
-        mlflow.log_dict(asdict(config), "config.json")
+        config_values = config.model_dump()
+        mlflow.log_params(config_values)
+        mlflow.log_dict(config_values, "config.json")
 
         cases = load_cases()
         if limit is not None:
@@ -118,11 +127,12 @@ def main(config: Config, limit: int | None = None) -> dict[str, float]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--limit", type=int)
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    for name, value in main(load_config(), limit=args.limit).items():
+    for name, value in main(load_config(args.config), limit=args.limit).items():
         print(f"  {name:<16} {value:.3f}")

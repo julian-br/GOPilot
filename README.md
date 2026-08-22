@@ -31,7 +31,7 @@ python setup.py
 Start the local MLflow dashboard from the repository root:
 
 ```powershell
-C:\Users\julia\miniconda3\envs\gopilot\python.exe -m mlflow ui --backend-store-uri sqlite:///mlflow.db --default-artifact-root .\mlruns --host 127.0.0.1 --port 5000
+mlflow ui --backend-store-uri sqlite:///mlflow.db --default-artifact-root .\mlruns --host 127.0.0.1 --port 5000
 ```
 
 Open http://127.0.0.1:5000 in the browser.

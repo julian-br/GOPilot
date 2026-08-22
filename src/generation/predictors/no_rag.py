@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 
-import mlflow
 from langchain_core.language_models.chat_models import BaseChatModel
-from mlflow.entities import SpanType
+from langchain_core.runnables import RunnableLambda
 
 from src.db.patients import Patient
 from src.generation.prompt_inputs import format_patient_context
@@ -15,26 +14,18 @@ class NoRagPredictor:
     model: BaseChatModel
 
     def predict(self, dictation: str, patient: Patient | None) -> RecommendationRun:
-        chain = BILLING_WITHOUT_RETRIEVAL_PROMPT | self.model.with_structured_output(
-            RecommendationResult, include_raw=True
-        )
-        result = chain.invoke(
+        chain = (
+            BILLING_WITHOUT_RETRIEVAL_PROMPT
+            | self.model.with_structured_output(
+                RecommendationResult, include_raw=True
+            )
+            | RunnableLambda(RecommendationRun.from_output)
+        ).with_config({"run_name": "recommendation"})
+        return chain.invoke(
             {
                 "dictation": dictation,
                 "patient_context": format_patient_context(patient),
             }
-        )
-        if result["parsing_error"] is not None:
-            raise result["parsing_error"]
-
-        reasoning = result["raw"].additional_kwargs.get("reasoning_content")
-        if reasoning:
-            with mlflow.start_span("model_reasoning", span_type=SpanType.LLM) as span:
-                span.set_outputs(reasoning)
-
-        return RecommendationRun(
-            result=result["parsed"],
-            reasoning=reasoning,
         )
 
     def close(self) -> None:

@@ -11,7 +11,7 @@ from qdrant_client import models
 from src.paths import FASTEMBED, QDRANT
 
 if TYPE_CHECKING:
-    from src.retrieval import RetrieverName
+    from src.config import RetrieverName
 
 RETRIEVAL_MODES: dict[RetrieverName, RetrievalMode] = {
     "dense": RetrievalMode.DENSE,

@@ -1,0 +1,7 @@
+experiment: default
+embedding_model: qwen3-embedding:4b
+generation_strategy: no_rag
+llm_provider: ollama
+llm_model: qwen3:4b
+practice_specialty: "001"
+retriever: hybrid

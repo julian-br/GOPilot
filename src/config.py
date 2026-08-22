@@ -1,19 +1,26 @@
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, get_args
+from typing import Literal, Self
 
 import yaml
+from pydantic import BaseModel, ConfigDict, PositiveInt, model_validator
 
 from src.paths import ROOT
-from src.retrieval import RETRIEVER_NAMES, RetrieverName
 
-DEFAULT_CONFIG = ROOT / "configs" / "default.yaml"
+DEFAULT_CONFIG = ROOT / "configs" / "rag.yaml"
 GenerationStrategy = Literal["no_rag", "rag", "agent"]
-GENERATION_STRATEGIES = get_args(GenerationStrategy)
+RetrieverName = Literal["dense", "sparse", "hybrid"]
 
 
-@dataclass(frozen=True)
-class Config:
+class RerankerConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
+    model: str
+    candidate_k: PositiveInt
+
+
+class Config(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
     experiment: str
     embedding_model: str
     generation_strategy: GenerationStrategy
@@ -21,21 +28,21 @@ class Config:
     llm_model: str
     practice_specialty: str
     retriever: RetrieverName
-    top_k: int
+    top_k: PositiveInt | None = None
+    reranker: RerankerConfig | None = None
 
-    def __post_init__(self) -> None:
-        if self.retriever not in RETRIEVER_NAMES:
-            allowed = ", ".join(RETRIEVER_NAMES)
-            raise ValueError(
-                f"unknown retriever {self.retriever!r}; expected one of: {allowed}"
-            )
-        if self.generation_strategy not in GENERATION_STRATEGIES:
-            allowed = ", ".join(GENERATION_STRATEGIES)
-            raise ValueError(
-                f"unknown generation strategy {self.generation_strategy!r}; "
-                f"expected one of: {allowed}"
-            )
+    @model_validator(mode="after")
+    def validate_strategy(self) -> Self:
+        if self.generation_strategy == "rag":
+            if self.top_k is None:
+                raise ValueError("top_k is required for RAG generation")
+            if self.reranker and self.reranker.candidate_k < self.top_k:
+                raise ValueError("reranker candidate_k must be at least top_k")
+        elif self.generation_strategy == "no_rag" and self.reranker:
+            raise ValueError("reranker is not supported without RAG")
+        return self
 
 
 def load_config(path: Path = DEFAULT_CONFIG) -> Config:
-    return Config(**yaml.safe_load(path.read_text(encoding="utf-8")))
+    values = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return Config.model_validate(values)
