@@ -1,12 +1,17 @@
 {
   "case_id": "case_004",
-  "patient_id": "P002",
-  "quartal": "2/2026",
-  "scenario": "Kurzer Verlaufskontrolltermin im selben Quartal ohne neue abrechenbare Leistung",
+  "patient": {
+    "id": "P002",
+    "age": 34,
+    "gender": "F",
+    "insurance": "TK",
+    "conditions": [],
+    "billed_gops_current_quarter": [
+      "03000"
+    ],
+    "previous_quarter_contacts": []
+  },
+  "quartal": "4/2026",
   "dictation": "Frau Schmidt, 34 Jahre. Kurzer persönlicher Kontrolltermin nach Angina. Beschwerden vollständig abgeklungen, Rachen reizlos, kein Fieber. Keine Laboruntersuchung, keine Prozedur, keine Verordnung und keine Bescheinigung. Patientin ist arbeitsfähig.",
-  "procedures": [
-    "Kurze Verlaufskontrolle"
-  ],
-  "expected_gops": [],
-  "notes": "03000 ist in diesem Quartal bereits abgerechnet. Es ist keine zusätzliche Leistung wie Labor, Gespräch mindestens 10 Minuten, Prozedur oder Bescheinigung dokumentiert."
+  "expected_gops": []
 }

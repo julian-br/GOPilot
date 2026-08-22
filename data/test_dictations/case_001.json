@@ -1,17 +1,34 @@
 {
   "case_id": "case_001",
-  "patient_id": "P001",
-  "quartal": "2/2026",
-  "scenario": "Hausarzt-Folgekontakt Chroniker im selben Quartal mit Therapieanpassung",
+  "patient": {
+    "id": "P001",
+    "age": 67,
+    "gender": "M",
+    "insurance": "AOK Bayern",
+    "conditions": [
+      "Diabetes mellitus Typ 2",
+      "arterielle Hypertonie"
+    ],
+    "billed_gops_current_quarter": [
+      "03000",
+      "03220"
+    ],
+    "previous_quarter_contacts": [
+      {
+        "quarter": "2/2026",
+        "contact_type": "persönlich",
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+      },
+      {
+        "quarter": "3/2026",
+        "contact_type": "persönlich",
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+      }
+    ]
+  },
+  "quartal": "4/2026",
   "dictation": "Herr Müller, 67 Jahre, persönlicher Kontrolltermin wegen Diabetes Typ 2 und Hypertonie. Es ist der zweite persönliche Arzt-Patienten-Kontakt in diesem Quartal. Blutdruck heute 152/94, Ramipril von 5 mg auf 10 mg erhöht. Blutzucker nüchtern 138 mg/dl, Diabetestagebuch besprochen. Rezept ausgestellt.",
-  "procedures": [
-    "Persönlicher Folgekontakt",
-    "Chronikerbetreuung",
-    "Therapieanpassung bei chronischer Erkrankung",
-    "Rezeptausstellung"
-  ],
   "expected_gops": [
     "03221"
-  ],
-  "notes": "03000 und 03220 sind laut Quartalskontext bereits abgerechnet. 03221 ist der Zuschlag zu 03220 bei mindestens zwei persönlichen Arzt-Patienten-Kontakten und Überprüfung/Anpassung der leitliniengestützten Behandlung. Rezept ist im persönlichen Kontakt nicht als 01430 abzurechnen."
+  ]
 }

@@ -1,19 +1,34 @@
 {
   "case_id": "case_012",
-  "patient_id": "P003",
-  "quartal": "1/2026",
-  "scenario": "Hausbesuch als Erstkontakt bei kardialer Dekompensation",
+  "patient": {
+    "id": "P003",
+    "age": 78,
+    "gender": "F",
+    "insurance": "Barmer",
+    "conditions": [
+      "COPD",
+      "Herzinsuffizienz",
+      "arterielle Hypertonie"
+    ],
+    "billed_gops_current_quarter": [],
+    "previous_quarter_contacts": [
+      {
+        "quarter": "2/2026",
+        "contact_type": "persönlich",
+        "reason": "Herzinsuffizienz und arterielle Hypertonie"
+      },
+      {
+        "quarter": "3/2026",
+        "contact_type": "persönlich",
+        "reason": "Herzinsuffizienz und arterielle Hypertonie"
+      }
+    ]
+  },
+  "quartal": "4/2026",
   "dictation": "Frau Weber, 78 Jahre. Patientin kann wegen zunehmender Atemnot und geschwollener Beine die Praxis nicht aufsuchen. Hausbesuch in der eigenen Häuslichkeit, persönlicher Arzt-Patienten-Kontakt. Bekannte COPD und Herzinsuffizienz sowie arterielle Hypertonie werden versorgt. Körperliche Untersuchung: deutliche beiderseitige Knöchelödeme bis Unterschenkel, Atemfrequenz 22/min, Blutdruck 162/98, Herzfrequenz 98/min, basale Rasselgeräusche beidseits. Verdacht auf kardiale Dekompensation. Torasemid-Dosis von 10 auf 20 mg täglich erhöht.",
-  "procedures": [
-    "Hausbesuch in der Häuslichkeit",
-    "Persönlicher Arzt-Patienten-Kontakt",
-    "Chronikerbetreuung",
-    "Therapieanpassung"
-  ],
   "expected_gops": [
     "03000",
     "03220",
     "01410"
-  ],
-  "notes": "03000 für den Erstkontakt im Quartal, weil beim Hausbesuch ein persönlicher Arzt-Patienten-Kontakt stattfindet. 03220 wegen COPD, Herzinsuffizienz und arterieller Hypertonie (mindestens 2 Dauerdiagnosen). 01410 für den Hausbesuch in der eigenen Häuslichkeit; wird zusätzlich zur Versichertenpauschale abgerechnet."
+  ]
 }

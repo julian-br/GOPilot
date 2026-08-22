@@ -1,18 +1,33 @@
 {
   "case_id": "case_002",
-  "patient_id": "P001",
-  "quartal": "3/2026",
-  "scenario": "Erstkontakt neues Quartal beim chronisch kranken Hausarztpatienten mit ABDM",
-  "dictation": "Herr Müller, 67 Jahre. Erstkontakt im neuen Quartal in der Hausarztpraxis. Diabetes mellitus Typ 2 und arterielle Hypertonie werden weiter betreut, HbA1c 6,9 %. Persönlicher Arzt-Patienten-Kontakt mit Beratung zu Ernährung und Medikamenten. Langzeit-Blutdruckmessung mit automatisierter Aufzeichnung über mindestens 20 Stunden wurde ausgewertet; computergestützte Auswertung und Beurteilung des Befundes sind dokumentiert.",
-  "procedures": [
-    "Persönlicher Arzt-Patienten-Kontakt",
-    "Chronikerbetreuung",
-    "Langzeit-Blutdruckmessung"
-  ],
+  "patient": {
+    "id": "P001",
+    "age": 67,
+    "gender": "M",
+    "insurance": "AOK Bayern",
+    "conditions": [
+      "Diabetes mellitus Typ 2",
+      "arterielle Hypertonie"
+    ],
+    "billed_gops_current_quarter": [],
+    "previous_quarter_contacts": [
+      {
+        "quarter": "2/2026",
+        "contact_type": "persönlich",
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+      },
+      {
+        "quarter": "3/2026",
+        "contact_type": "persönlich",
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+      }
+    ]
+  },
+  "quartal": "4/2026",
+  "dictation": "Herr Müller, 67 Jahre. Erstkontakt im neuen Quartal in der Hausarztpraxis. Diabetes mellitus Typ 2 und arterielle Hypertonie werden weiter betreut, HbA1c 6,9 %. Persönlicher Arzt-Patienten-Kontakt mit Beratung zu Ernährung und Medikamenten. Langzeit-Blutdruckmessung mit automatisierter Aufzeichnung über mindestens 20 Stunden wurde ausgewertet. Die Blutdruckwerte wurden tagsüber alle 15 Minuten und während der Nachtruhe alle 30 Minuten bei simultaner Aufzeichnung der Herzfrequenz erfasst; computergestützte Auswertung und Beurteilung des Befundes sind dokumentiert.",
   "expected_gops": [
     "03000",
     "03220",
     "03324"
-  ],
-  "notes": "Neues Quartal ohne Vorabrechnung: 03000 Versichertenpauschale und 03220 Chronikerzuschlag sind plausibel. Die Langzeit-Blutdruckmessung ist mit mindestens 20 Stunden, computergestützter Auswertung und Befundbeurteilung dokumentiert und passt zu 03324."
+  ]
 }

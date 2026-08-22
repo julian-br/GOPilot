@@ -1,15 +1,36 @@
 {
   "case_id": "case_020",
-  "patient_id": "P003",
+  "patient": {
+    "id": "P003",
+    "age": 78,
+    "gender": "F",
+    "insurance": "Barmer",
+    "conditions": [
+      "COPD",
+      "Herzinsuffizienz",
+      "arterielle Hypertonie"
+    ],
+    "billed_gops_current_quarter": [
+      "03000",
+      "03220"
+    ],
+    "previous_quarter_contacts": [
+      {
+        "quarter": "2/2026",
+        "contact_type": "persönlich",
+        "reason": "Herzinsuffizienz und arterielle Hypertonie"
+      },
+      {
+        "quarter": "3/2026",
+        "contact_type": "persönlich",
+        "reason": "Herzinsuffizienz und arterielle Hypertonie"
+      }
+    ]
+  },
   "quartal": "4/2026",
-  "scenario": "Hausbesuch im Folgekontakt mit intravenöser Infusion bei Herzinsuffizienz",
-  "dictation": "Frau Weber, 78 Jahre. Zweiter Kontakt im Quartal, Versichertenpauschale und Chronikerpauschale sind bereits abgerechnet. Hausbesuch in der eigenen Häuslichkeit auf Anforderung des Pflegedienstes wegen akuter Luftnotverschlechterung. Persönlicher Arzt-Patienten-Kontakt. Körperliche Untersuchung: deutliche Dyspnoe, Sauerstoffsättigung 91 %, Beinödeme beidseits zugenommen, Blutdruck 172/102. Furosemid 40 mg intravenöse Infusion über 20 Minuten verabreicht, Patientin klinisch gebessert, Sauerstoffsättigung 95 %. Engmaschige Kontrolle vereinbart.",
-  "procedures": [
-    "Hausbesuch in der Häuslichkeit",
-    "Intravenöse Infusion"
-  ],
+  "dictation": "Frau Weber, 78 Jahre. Zweiter Kontakt im Quartal, Versichertenpauschale und Chronikerpauschale sind bereits abgerechnet. Hausbesuch in der eigenen Häuslichkeit auf Anforderung des Pflegedienstes wegen akuter Luftnotverschlechterung. Persönlicher Arzt-Patienten-Kontakt. Körperliche Untersuchung: deutliche Dyspnoe, Sauerstoffsättigung 91 %, Beinödeme beidseits zugenommen, Blutdruck 172/102. Die leitliniengestützte Dauermedikation der Herzinsuffizienz wurde überprüft und wegen der akuten Dekompensation angepasst. Furosemid 40 mg intravenöse Infusion über 20 Minuten verabreicht, Patientin klinisch gebessert, Sauerstoffsättigung 95 %. Engmaschige Kontrolle vereinbart.",
   "expected_gops": [
-    "01410"
-  ],
-  "notes": "01410 für den Hausbesuch in der eigenen Häuslichkeit; auch beim zweiten Kontakt im Quartal abrechenbar, da es sich um einen eigenständigen Hausbesuch handelt. Die Infusion ist in der hausärztlichen Regelversorgung nicht gesondert berechnungsfähig. 03000 und 03220 sind bereits abgerechnet."
+    "01410",
+    "03221"
+  ]
 }
