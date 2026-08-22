@@ -27,7 +27,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Frau Weber, 78 Jahre. Zweiter Kontakt im Quartal, Versichertenpauschale und Chronikerpauschale sind bereits abgerechnet. Hausbesuch in der eigenen Häuslichkeit auf Anforderung des Pflegedienstes wegen akuter Luftnotverschlechterung. Persönlicher Arzt-Patienten-Kontakt. Körperliche Untersuchung: deutliche Dyspnoe, Sauerstoffsättigung 91 %, Beinödeme beidseits zugenommen, Blutdruck 172/102. Die leitliniengestützte Dauermedikation der Herzinsuffizienz wurde überprüft und wegen der akuten Dekompensation angepasst. Furosemid 40 mg intravenöse Infusion über 20 Minuten verabreicht, Patientin klinisch gebessert, Sauerstoffsättigung 95 %. Engmaschige Kontrolle vereinbart.",
   "expected_gops": [
     "01410",

@@ -24,7 +24,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Frau Weber, 78 Jahre. Patientin kann wegen zunehmender Atemnot und geschwollener Beine die Praxis nicht aufsuchen. Hausbesuch in der eigenen Häuslichkeit, persönlicher Arzt-Patienten-Kontakt. Bekannte COPD und Herzinsuffizienz sowie arterielle Hypertonie werden versorgt. Körperliche Untersuchung: deutliche beiderseitige Knöchelödeme bis Unterschenkel, Atemfrequenz 22/min, Blutdruck 162/98, Herzfrequenz 98/min, basale Rasselgeräusche beidseits. Verdacht auf kardiale Dekompensation. Torasemid-Dosis von 10 auf 20 mg täglich erhöht.",
   "expected_gops": [
     "03000",

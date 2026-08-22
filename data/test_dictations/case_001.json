@@ -26,7 +26,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Herr Müller, 67 Jahre, persönlicher Kontrolltermin wegen Diabetes Typ 2 und Hypertonie. Es ist der zweite persönliche Arzt-Patienten-Kontakt in diesem Quartal. Blutdruck heute 152/94, Ramipril von 5 mg auf 10 mg erhöht. Blutzucker nüchtern 138 mg/dl, Diabetestagebuch besprochen. Rezept ausgestellt.",
   "expected_gops": [
     "03221"

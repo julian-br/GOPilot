@@ -12,7 +12,6 @@
     "billed_gops_current_quarter": [],
     "previous_quarter_contacts": []
   },
-  "quartal": "4/2026",
   "dictation": "Herr Sommer, 78 Jahre. Erstkontakt in der Hausarztpraxis, persönlicher Arzt-Patienten-Kontakt. Bekannte Herzrhythmusstörungen und koronare Herzkrankheit. Patient klagt über gelegentliches Herzstolpern in Ruhe. Genehmigung der KV zur Durchführung langzeitelektrokardiographischer Untersuchungen liegt vor. Langzeit-EKG-Gerät angelegt und eingestellt, Aufzeichnungsstart; Aufzeichnungsdauer 24 Stunden. Patient gibt das Gerät am nächsten Tag zurück; computergestützte Auswertung des kontinuierlich aufgezeichneten Langzeit-EKG von mehr als 18 Stunden Dauer und Befundbeurteilung durchgeführt: vereinzelte supraventrikuläre Extrasystolen, keine signifikanten tachykarden oder bradykarden Episoden.",
   "expected_gops": [
     "03000",

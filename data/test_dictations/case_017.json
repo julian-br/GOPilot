@@ -25,7 +25,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Frau Kaya, 41 Jahre. Kein persönlicher Arzt-Patienten-Kontakt in der Praxis. Patientin ruft wegen akuter Verschlechterung des Asthmas an; ärztliche telefonische Beratung im Zusammenhang mit der Erkrankung, Dauer 7 Minuten: Symptombewertung, Empfehlung zur Steigerung der Bedarfsmedikation und Besprechung von Warnzeichen für eine Notaufnahme. Auf ausdrücklichen Wunsch der Patientin wird anschließend ohne weiteren persönlichen Kontakt ein Wiederholungsrezept für Salbutamol-Dosieraerosol ausgestellt.",
   "expected_gops": []
 }

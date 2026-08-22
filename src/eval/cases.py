@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from src.paths import DATA
+from src.patient import Patient, PreviousQuarterContact
 
 CASES = DATA / "test_dictations"
 
@@ -13,8 +14,7 @@ CASES = DATA / "test_dictations"
 class Case:
     case_id: str
     dictation: str
-    patient_id: str
-    quarter: str
+    patient: Patient
     expected: tuple[str, ...]
 
 
@@ -23,10 +23,27 @@ def load_cases(path: Path = CASES) -> list[Case]:
 
 
 def _case(raw: dict) -> Case:
+    patient = raw["patient"]
     return Case(
         case_id=raw["case_id"],
         dictation=raw["dictation"],
-        patient_id=raw["patient_id"],
-        quarter=raw["quartal"],
+        patient=Patient(
+            id=patient["id"],
+            age=patient["age"],
+            gender=patient["gender"],
+            insurance=patient["insurance"],
+            conditions=tuple(patient["conditions"]),
+            billed_gops_current_quarter=tuple(
+                patient["billed_gops_current_quarter"]
+            ),
+            previous_quarter_contacts=tuple(
+                PreviousQuarterContact(
+                    quarter=contact["quarter"],
+                    contact_type=contact["contact_type"],
+                    reason=contact["reason"],
+                )
+                for contact in patient["previous_quarter_contacts"]
+            ),
+        ),
         expected=tuple(raw["expected_gops"]),
     )

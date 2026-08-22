@@ -16,6 +16,9 @@ The EBM catalogue comes from the KBV **SDEBM** master data feed, not from the PD
 XML — 3,570 GOPs (regional suffix variants excluded), with points, exclusions, base-service
 dependencies, age limits and the obligatory service content as structured fields.
 
+Setup writes the catalogue to the versioned Qdrant collection configured by `ebm_collection`.
+Runtime derives the catalogue quarter from that collection name and never accesses the source XML.
+
 Design decisions are logged in [docs/decisions.md](docs/decisions.md).
 
 ## Setup
@@ -35,3 +38,9 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db --default-artifact-root .\mlru
 ```
 
 Open http://127.0.0.1:5000 in the browser.
+
+## Evaluation
+
+Each test case is an independent snapshot. Its patient history is fixed input and is never updated
+with recommendations from another case. `expected_gops` contains GOPs the physician should actively
+submit or recommend; GOPs added automatically by the KV are outside the evaluation scope.

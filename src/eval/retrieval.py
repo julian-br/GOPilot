@@ -37,7 +37,11 @@ def main(config: Config) -> dict[str, float]:
 
     mlflow.set_experiment(config.experiment)
     cases = [c for c in load_cases() if c.expected]
-    store = open_store(config.embedding_model, config.retriever)
+    store = open_store(
+        config.embedding_model,
+        config.ebm_collection,
+        config.retriever,
+    )
     try:
         cutoffs = tuple(sorted({*CUTOFFS, config.top_k}))
         retriever = build_retriever(

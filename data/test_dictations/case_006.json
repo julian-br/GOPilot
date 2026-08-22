@@ -21,7 +21,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Frau Weber, 78 Jahre. Persönlicher Hausarzttermin wegen akuter Verschlechterung der Luftnot bei bekannter COPD. Die Versichertenpauschale ist in diesem Quartal bereits abgerechnet. Körperliche Untersuchung mit RR 168/98 und Herzfrequenz 112. Spirographische Untersuchung durchgeführt mit Darstellung der Flussvolumenkurve, in- und exspiratorischen Messungen und graphischer Registrierung; FEV1/FVC 0,61. Zusätzlich Infusion Furosemid 40 mg intravenös über 20 Minuten angelegt, Patientin stabilisiert.",
   "expected_gops": [
     "03330"

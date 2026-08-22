@@ -22,6 +22,7 @@ class Config(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
     experiment: str
+    ebm_collection: str
     embedding_model: str
     generation_strategy: GenerationStrategy
     llm_provider: str
@@ -33,9 +34,11 @@ class Config(BaseModel):
 
     @model_validator(mode="after")
     def validate_strategy(self) -> Self:
-        if self.generation_strategy == "rag":
+        if self.generation_strategy in ("rag", "agent"):
             if self.top_k is None:
-                raise ValueError("top_k is required for RAG generation")
+                raise ValueError(
+                    f"top_k is required for {self.generation_strategy} generation"
+                )
             if self.reranker and self.reranker.candidate_k < self.top_k:
                 raise ValueError("reranker candidate_k must be at least top_k")
         elif self.generation_strategy == "no_rag" and self.reranker:

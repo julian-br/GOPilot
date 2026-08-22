@@ -9,7 +9,6 @@
     "billed_gops_current_quarter": [],
     "previous_quarter_contacts": []
   },
-  "quartal": "4/2026",
   "dictation": "Herr Becker, 50 Jahre. Kein persönlicher Arzt-Patienten-Kontakt und keine telefonische ärztliche Beratung in diesem Quartal. Auf Wunsch des Patienten wurden ein Wiederholungsrezept für die Dauermedikation und eine Überweisung zum Orthopäden ausgestellt. Es erfolgte nur die Verwaltungstätigkeit ohne Untersuchung.",
   "expected_gops": [
     "01430"

@@ -23,7 +23,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Herr Müller, 67 Jahre. Erstkontakt im neuen Quartal in der Hausarztpraxis. Diabetes mellitus Typ 2 und arterielle Hypertonie werden weiter betreut, HbA1c 6,9 %. Persönlicher Arzt-Patienten-Kontakt mit Beratung zu Ernährung und Medikamenten. Langzeit-Blutdruckmessung mit automatisierter Aufzeichnung über mindestens 20 Stunden wurde ausgewertet. Die Blutdruckwerte wurden tagsüber alle 15 Minuten und während der Nachtruhe alle 30 Minuten bei simultaner Aufzeichnung der Herzfrequenz erfasst; computergestützte Auswertung und Beurteilung des Befundes sind dokumentiert.",
   "expected_gops": [
     "03000",

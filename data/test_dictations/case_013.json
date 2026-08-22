@@ -22,7 +22,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Frau Kaya, 41 Jahre. Erstkontakt im Quartal, persönlicher Arzt-Patienten-Kontakt. Bekanntes Asthma bronchiale als lebensverändernde chronische Erkrankung; Patientin klagt über zunehmende Belastungsdyspnoe seit zwei Wochen. Spirographische Untersuchung durchgeführt: Darstellung der Flussvolumenkurve, in- und exspiratorische Messungen mit graphischer Registrierung; FEV1/FVC 0,72, FVC 94 % des Sollwerts. Inhalationstherapie optimiert, neues LABA-Präparat verordnet.",
   "expected_gops": [
     "03000",

@@ -23,7 +23,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Herr Müller, 67 Jahre. Erstkontakt im neuen Quartal, persönlicher Arzt-Patienten-Kontakt. Diabetes mellitus Typ 2 und arterielle Hypertonie werden weiter betreut. Patient berichtet über Belastungsdyspnoe beim Treppensteigen. Belastungs-Elektrokardiographie am Ergometer durchgeführt: Untersuchung in Ruhe und unter definierter Stufenbelastung, mindestens 12 Ableitungen in Ruhe sowie mindestens 3 Ableitungen während der Belastung, fortlaufende Kontrolle des Kurvenverlaufes, wiederholte Blutdruckmessung. Abbruchkriterien nicht erreicht, keine Ischämiezeichen unter Belastung.",
   "expected_gops": [
     "03000",

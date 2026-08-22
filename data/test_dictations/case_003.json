@@ -9,7 +9,6 @@
     "billed_gops_current_quarter": [],
     "previous_quarter_contacts": []
   },
-  "quartal": "4/2026",
   "dictation": "Frau Schmidt, 34 Jahre. Erstkontakt dieses Quartal, persönlicher Arzt-Patienten-Kontakt. Seit drei Tagen Halsschmerzen und Fieber 38,8 Grad. Körperliche Untersuchung: Rachen gerötet, Tonsillen vergrößert mit weißlichen Belägen. Streptokokken-A-Schnelltest als orientierende Untersuchung mit visueller Auswertung eines vorgefertigten Reagenzträgers durchgeführt, positiv. Penicillin V verordnet, Arbeitsunfähigkeit bescheinigt.",
   "expected_gops": [
     "03000",

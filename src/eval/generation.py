@@ -10,7 +10,6 @@ import mlflow.langchain
 from mlflow.entities import SpanStatusCode
 
 from src.config import DEFAULT_CONFIG, Config, load_config
-from src.db import get_patient
 from src.eval.cases import Case, load_cases
 from src.generation.predictors import Predictor, build_predictor
 
@@ -27,16 +26,14 @@ def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
                 "case_id": case.case_id,
                 "case_index": index,
                 "cases": len(cases),
-                "patient_id": case.patient_id,
-                "quarter": case.quarter,
+                "patient_id": case.patient.id,
                 "expected": list(case.expected),
             },
         ) as span:
             error = None
             reasoning = None
             try:
-                patient = get_patient(case.patient_id, case.quarter)
-                run = predictor.predict(case.dictation, patient)
+                run = predictor.predict(case.dictation, case.patient)
                 reasoning = run.reasoning
                 predictions = [
                     {"rank": i, "code": r.code, "reason": r.reason}

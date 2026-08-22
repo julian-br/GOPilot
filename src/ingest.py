@@ -2,13 +2,19 @@
 
 from langchain_core.documents import Document
 
-from src.db.vectors import open_store
-from src.ebm import load_gops
+from src.db.vectors import collection_quarter, open_store
+from src.ebm import load_gops, load_quarter
 
 
-def build_index(embedding_model: str) -> int:
-    docs = documents()
-    store = open_store(embedding_model, force_recreate=True)
+def build_index(embedding_model: str, collection_name: str) -> int:
+    quarter = collection_quarter(collection_name)
+    source_quarter = load_quarter()
+    if quarter != source_quarter:
+        raise ValueError(
+            f"collection quarter {quarter} does not match EBM source {source_quarter}"
+        )
+    docs = documents(quarter)
+    store = open_store(embedding_model, collection_name, force_recreate=True)
     try:
         store.add_documents(docs)
     finally:
@@ -16,11 +22,15 @@ def build_index(embedding_model: str) -> int:
     return len(docs)
 
 
-def documents() -> list[Document]:
+def documents(quarter: str) -> list[Document]:
     return [
         Document(
             page_content=gop.embedding_text,
-            metadata={"code": gop.code, "specialties": list(gop.specialties)},
+            metadata={
+                "code": gop.code,
+                "specialties": list(gop.specialties),
+                "quarter": quarter,
+            },
         )
         for gop in load_gops()
     ]

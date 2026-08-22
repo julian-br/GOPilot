@@ -24,7 +24,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Frau Weber, 78 Jahre. Erstkontakt im neuen Quartal in der Hausarztpraxis. Bekannte COPD und Hypertonie werden fortlaufend betreut, persönlicher Arzt-Patienten-Kontakt mit Beratung zur Inhalationstherapie. Spirographische Untersuchung durchgeführt: Darstellung der Flussvolumenkurve, in- und exspiratorische Messungen und graphische Registrierung.",
   "expected_gops": [
     "03000",

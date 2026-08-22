@@ -1,9 +1,11 @@
+from src.generation.predictors.agent import AgentPredictor
 from src.generation.predictors.base import Predictor
 from src.generation.predictors.factory import build_predictor
 from src.generation.predictors.no_rag import NoRagPredictor
 from src.generation.predictors.rag import RagPredictor
 
 __all__ = [
+    "AgentPredictor",
     "NoRagPredictor",
     "Predictor",
     "RagPredictor",

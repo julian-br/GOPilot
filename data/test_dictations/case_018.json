@@ -26,7 +26,6 @@
       }
     ]
   },
-  "quartal": "4/2026",
   "dictation": "Herr Müller, 67 Jahre. Zweiter persönlicher Arzt-Patienten-Kontakt im Quartal, Versichertenpauschale und Chronikerpauschale sind bereits abgerechnet. Kontrolle nach Metoprolol-Neueinstellung wegen Belastungsdyspnoe. Belastungs-Elektrokardiographie am Ergometer: Untersuchung in Ruhe und unter Stufenbelastung, mindestens 12 Ableitungen in Ruhe, mindestens 3 Ableitungen unter Belastung, fortlaufende Kontrolle des Kurvenverlaufes, wiederholte Blutdruckmessung; keine Ischämiezeichen, Herzfrequenz unter Belastung jetzt adäquat begrenzt. Metoprolol 25 mg beibehalten; Überprüfung der leitliniengestützten Dauermedikation dokumentiert.",
   "expected_gops": [
     "03221",

@@ -1,7 +1,7 @@
 from typing import Protocol
 
-from src.db.patients import Patient
 from src.generation.schemas import RecommendationRun
+from src.patient import Patient
 
 
 class Predictor(Protocol):
