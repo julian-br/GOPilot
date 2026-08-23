@@ -2,7 +2,7 @@ experiment: default
 ebm_collection: ebm_2026_q4
 generation_strategy: agent
 llm_provider: ollama
-llm_model: qwen3.5:9b
+llm_model: qwen3.5:4b
 practice_specialty: "001"
 retriever: hybrid
 top_k: 10

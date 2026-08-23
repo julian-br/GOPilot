@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-from typing import Any, Self
-
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -22,16 +19,3 @@ class RecommendationResult(BaseModel):
     recommendations: list[Recommendation] = Field(
         description="Recommended EBM GOP billing codes"
     )
-
-
-@dataclass(frozen=True)
-class RecommendationRun:
-    result: RecommendationResult
-    reasoning: str | None
-
-    @classmethod
-    def from_output(cls, output: dict[str, Any]) -> Self:
-        if output["parsing_error"] is not None:
-            raise output["parsing_error"]
-        reasoning = output["raw"].additional_kwargs.get("reasoning_content")
-        return cls(result=output["parsed"], reasoning=reasoning)

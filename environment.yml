@@ -13,6 +13,7 @@ dependencies:
   - pyyaml
   - pip
   - pip:
+      - langchain-openai>=1.1
       - langchain-qdrant>=1.1
       - qdrant-client>=1.19
       - fastembed>=0.8

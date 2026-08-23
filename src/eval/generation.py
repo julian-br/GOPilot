@@ -7,6 +7,7 @@ from typing import Any
 
 import mlflow
 import mlflow.langchain
+import mlflow.openai
 from mlflow.entities import SpanStatusCode
 
 from src.config import DEFAULT_CONFIG, Config, RetrievalConfig, load_config
@@ -31,13 +32,11 @@ def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
             },
         ) as span:
             error = None
-            reasoning = None
             try:
-                run = predictor.predict(case.dictation, case.patient)
-                reasoning = run.reasoning
+                result = predictor.predict(case.dictation, case.patient)
                 predictions = [
                     {"code": recommendation.code, "reason": recommendation.reason}
-                    for recommendation in run.result.recommendations
+                    for recommendation in result.recommendations
                 ]
             except Exception as exc:
                 predictions = []
@@ -50,7 +49,6 @@ def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
             case_result = {
                 "expected": list(case.expected),
                 "predicted": predictions,
-                "reasoning": reasoning,
                 "true_positive": [code for code in case.expected if code in predicted],
                 "false_positive": [
                     p["code"] for p in predictions if p["code"] not in expected
@@ -103,6 +101,7 @@ def main(config: Config, limit: int | None = None) -> dict[str, float]:
     run_name = f"{strategy}-{config.llm_model}"
     with mlflow.start_run(run_name=run_name):
         mlflow.langchain.autolog(log_traces=True)
+        mlflow.openai.autolog()
         config_values = config.model_dump()
         mlflow.log_params(config_values)
         mlflow.log_dict(config_values, "config.json")

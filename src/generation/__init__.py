@@ -5,7 +5,7 @@ from src.generation.predictors import (
     RagPredictor,
     build_predictor,
 )
-from src.generation.schemas import Recommendation, RecommendationResult, RecommendationRun
+from src.generation.schemas import Recommendation, RecommendationResult
 
 __all__ = [
     "NoRagPredictor",
@@ -13,7 +13,6 @@ __all__ = [
     "RagPredictor",
     "Recommendation",
     "RecommendationResult",
-    "RecommendationRun",
     "build_predictor",
     "open_chat_model",
 ]

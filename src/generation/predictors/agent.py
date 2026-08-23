@@ -1,15 +1,14 @@
 from typing import Callable
 
 from langchain.agents import create_agent
-from langchain.agents.structured_output import ToolStrategy
+from langchain.agents.structured_output import ProviderStrategy
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import AIMessage
 from langchain_core.retrievers import BaseRetriever
 from langchain_qdrant import QdrantVectorStore
 
 from src.generation.prompt_inputs import format_patient_context
 from src.generation.prompts import AGENT_SYSTEM_PROMPT
-from src.generation.schemas import RecommendationResult, RecommendationRun
+from src.generation.schemas import RecommendationResult
 from src.generation.tools import build_get_gop_tool, build_search_gops_tool
 from src.patient import Patient
 
@@ -31,13 +30,13 @@ class AgentPredictor:
                 build_get_gop_tool(store, specialty),
             ],
             system_prompt=AGENT_SYSTEM_PROMPT,
-            response_format=ToolStrategy(RecommendationResult),
+            response_format=ProviderStrategy(RecommendationResult),
             name="billing_agent",
         )
         self._quarter = quarter
         self._close_resources = close_resources
 
-    def predict(self, dictation: str, patient: Patient | None) -> RecommendationRun:
+    def predict(self, dictation: str, patient: Patient | None) -> RecommendationResult:
         patient_context = format_patient_context(
             patient, current_quarter=self._quarter
         )
@@ -56,18 +55,10 @@ class AgentPredictor:
                 ]
             }
         )
-        reasoning_parts = [
-            message.additional_kwargs.get("reasoning_content")
-            for message in output["messages"]
-            if isinstance(message, AIMessage)
-        ]
-        reasoning = "\n\n".join(part for part in reasoning_parts if part) or None
-        if "structured_response" not in output:
-            raise ValueError("agent did not return a structured response")
-        return RecommendationRun(
-            result=output["structured_response"],
-            reasoning=reasoning,
-        )
+        result = output.get("structured_response")
+        if not isinstance(result, RecommendationResult):
+            raise ValueError("agent did not return a valid structured response")
+        return result
 
     def close(self) -> None:
         self._close_resources()

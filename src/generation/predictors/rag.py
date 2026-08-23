@@ -1,42 +1,49 @@
-from dataclasses import dataclass
+from operator import itemgetter
 from typing import Callable
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.retrievers import BaseRetriever
-from langchain_core.runnables import RunnableLambda
+from langchain_core.runnables import Runnable, RunnableLambda, RunnablePassthrough
 
 from src.generation.prompt_inputs import format_candidates, format_patient_context
 from src.generation.prompts import RAG_BILLING_PROMPT
-from src.generation.schemas import RecommendationResult, RecommendationRun
+from src.generation.schemas import RecommendationResult
 from src.patient import Patient
 
 
-@dataclass(frozen=True)
 class RagPredictor:
-    model: BaseChatModel
-    retriever: BaseRetriever
-    quarter: str
-    close_resources: Callable[[], None] = lambda: None
-
-    def predict(self, dictation: str, patient: Patient | None) -> RecommendationRun:
-        candidates = self.retriever.invoke(dictation)
-        chain = (
-            RAG_BILLING_PROMPT
-            | self.model.with_structured_output(
-                RecommendationResult, include_raw=True
+    def __init__(
+        self,
+        model: BaseChatModel,
+        retriever: BaseRetriever,
+        quarter: str,
+        close_resources: Callable[[], None] = lambda: None,
+    ) -> None:
+        retrieval = (
+            RunnableLambda(itemgetter("dictation"), name="extract_dictation")
+            | retriever.with_config({"run_name": "retrieve_gops"})
+            | RunnableLambda(format_candidates, name="format_candidates")
+        )
+        self._chain: Runnable = (
+            RunnablePassthrough.assign(candidates=retrieval)
+            | RAG_BILLING_PROMPT
+            | model.with_structured_output(
+                RecommendationResult, method="function_calling"
             )
-            | RunnableLambda(RecommendationRun.from_output)
         ).with_config({"run_name": "recommendation"})
-        return chain.invoke(
+        self._quarter = quarter
+        self._close_resources = close_resources
+
+    def predict(self, dictation: str, patient: Patient | None) -> RecommendationResult:
+        return self._chain.invoke(
             {
                 "dictation": dictation,
-                "quarter": self.quarter,
+                "quarter": self._quarter,
                 "patient_context": format_patient_context(
-                    patient, current_quarter=self.quarter
+                    patient, current_quarter=self._quarter
                 ),
-                "candidates": format_candidates(candidates),
             }
         )
 
     def close(self) -> None:
-        self.close_resources()
+        self._close_resources()
