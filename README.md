@@ -47,3 +47,18 @@ Open http://127.0.0.1:5000 in the browser.
 Each test case is an independent snapshot. Its patient history is fixed input and is never updated
 with recommendations from another case. `expected_gops` contains GOPs the physician should actively
 submit or recommend; GOPs added automatically by the KV are outside the evaluation scope.
+
+### Preliminary results
+
+The following micro-averaged GOP-level results are a preliminary baseline on the 20 local test
+dictations, using `gemma4:e4b` and the current prompts and catalogue configuration. They are for
+comparison during development, not a claim of clinical or billing accuracy.
+
+| Strategy | Precision | Recall | F1 | Error rate |
+| --- | ---: | ---: | ---: | ---: |
+| No RAG | 0.161 | 0.135 | 0.147 | 0.000 |
+| RAG | 0.381 | 0.216 | 0.276 | 0.050 |
+| Agent | 0.308 | 0.216 | 0.254 | 0.000 |
+
+The RAG run had one structured-output validation error; the other 19 cases completed. All 20
+agent cases completed without an execution error.
