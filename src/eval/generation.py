@@ -36,8 +36,8 @@ def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
                 run = predictor.predict(case.dictation, case.patient)
                 reasoning = run.reasoning
                 predictions = [
-                    {"rank": i, "code": r.code, "reason": r.reason}
-                    for i, r in enumerate(run.result.recommendations, 1)
+                    {"code": recommendation.code, "reason": recommendation.reason}
+                    for recommendation in run.result.recommendations
                 ]
             except Exception as exc:
                 predictions = []

@@ -7,10 +7,9 @@
     "gender": "M",
     "insurance": "DAK-Gesundheit",
     "conditions": [],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": []
+    "prior_contacts": []
   },
-  "dictation": "Herr Becker, 50 Jahre. Erstkontakt im Quartal, persönlicher Arzt-Patienten-Kontakt nach Schnittverletzung am linken Unterarm. Wunde gereinigt, desinfiziert und primäre Wundversorgung mittels drei Einzelknopfnähten durchgeführt. Tetanusstatus geprüft, Verband angelegt.",
+  "dictation": "Herr Becker, 50 Jahre, kam persönlich, hat sich beim Basteln am linken Unterarm geschnitten, das Messer sei ihm abgerutscht. Wunde gut drei Zentimeter lang, glattrandig. Gereinigt und desinfiziert, dann primär versorgt mit drei Einzelknopfnähten. Blutung steht, die Wundränder liegen sauber an. Tetanusschutz hab ich nachgeschaut, ist aktuell. Verband drauf, Fäden ziehen in zehn Tagen.",
   "expected_gops": [
     "03000",
     "02301"

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from src.ebm.version import parse_quarter
 from src.paths import DATA
-from src.patient import Patient, PreviousQuarterContact
+from src.patient import Patient, PriorContact
 
 CASES = DATA / "test_dictations"
 
@@ -45,16 +45,14 @@ def _case(raw: dict) -> Case:
             gender=patient["gender"],
             insurance=patient["insurance"],
             conditions=tuple(patient["conditions"]),
-            billed_gops_current_quarter=tuple(
-                patient["billed_gops_current_quarter"]
-            ),
-            previous_quarter_contacts=tuple(
-                PreviousQuarterContact(
+            prior_contacts=tuple(
+                PriorContact(
                     quarter=contact["quarter"],
                     contact_type=contact["contact_type"],
                     reason=contact["reason"],
+                    billed_gops=tuple(contact["billed_gops"]),
                 )
-                for contact in patient["previous_quarter_contacts"]
+                for contact in patient["prior_contacts"]
             ),
         ),
         expected=tuple(raw["expected_gops"]),

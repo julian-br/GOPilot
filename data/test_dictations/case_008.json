@@ -6,25 +6,22 @@
     "age": 41,
     "gender": "F",
     "insurance": "AOK Nordost",
-    "conditions": [
-      "Asthma bronchiale"
-    ],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": [
+    "conditions": ["Asthma bronchiale"],
+    "prior_contacts": [
       {
         "quarter": "2/2026",
         "contact_type": "persönlich",
-        "reason": "Asthma bronchiale"
+        "reason": "Asthma bronchiale",
+        "billed_gops": ["03000"]
       },
       {
         "quarter": "3/2026",
         "contact_type": "persönlich",
-        "reason": "Asthma bronchiale"
+        "reason": "Asthma bronchiale",
+        "billed_gops": ["03000"]
       }
     ]
   },
-  "dictation": "Frau Kaya, 41 Jahre. Patientin ruft wegen akutem Durchfall und Übelkeit an. Kein persönlicher Arzt-Patienten-Kontakt in der Praxis. Ärztliche telefonische Beratung im Zusammenhang mit der Erkrankung, Trinkmenge, Warnzeichen und Wiedervorstellung besprochen. Dauer der telefonischen Beratung 8 Minuten.",
-  "expected_gops": [
-    "01435"
-  ]
+  "dictation": "Patientin hat angerufen, seit heute früh Durchfall und Übelkeit. In der Praxis war sie nicht, wir haben das am Telefon besprochen. Ich hab sie zu den Beschwerden befragt, wir sind durchgegangen, wie viel sie trinken soll, worauf sie achten muss und wann sie sich wieder melden oder vorstellen soll. Das Gespräch hat gut acht Minuten gedauert. Wenn es nicht besser wird, kommt sie morgen vorbei.",
+  "expected_gops": ["01435"]
 }

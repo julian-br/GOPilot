@@ -11,21 +11,22 @@
       "Herzinsuffizienz",
       "arterielle Hypertonie"
     ],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": [
+    "prior_contacts": [
       {
         "quarter": "2/2026",
         "contact_type": "persönlich",
-        "reason": "COPD und arterielle Hypertonie"
+        "reason": "COPD und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       },
       {
         "quarter": "3/2026",
         "contact_type": "persönlich",
-        "reason": "COPD und arterielle Hypertonie"
+        "reason": "COPD und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       }
     ]
   },
-  "dictation": "Frau Weber, 78 Jahre. Erstkontakt im neuen Quartal in der Hausarztpraxis. Bekannte COPD und Hypertonie werden fortlaufend betreut, persönlicher Arzt-Patienten-Kontakt mit Beratung zur Inhalationstherapie. Spirographische Untersuchung durchgeführt: Darstellung der Flussvolumenkurve, in- und exspiratorische Messungen und graphische Registrierung.",
+  "dictation": "Frau Weber, 78 Jahre, persönlich in der Sprechstunde. Ihre COPD und der Bluthochdruck werden bei uns weiter betreut. Wir haben in Ruhe über die Inhalation gesprochen, ich hab mir zeigen lassen, wie sie das Spray benutzt, da war einiges zu korrigieren. Das Treppensteigen gehe im Moment einigermaßen, sagt sie. Lungenfunktion gemacht: Fluss-Volumen-Kurve aufgezeichnet, Ein- und Ausatmung gemessen, Kurve ausgedruckt und befundet.",
   "expected_gops": [
     "03000",
     "03220",

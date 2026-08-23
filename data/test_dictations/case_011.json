@@ -10,21 +10,22 @@
       "Diabetes mellitus Typ 2",
       "arterielle Hypertonie"
     ],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": [
+    "prior_contacts": [
       {
         "quarter": "2/2026",
         "contact_type": "persönlich",
-        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       },
       {
         "quarter": "3/2026",
         "contact_type": "persönlich",
-        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       }
     ]
   },
-  "dictation": "Herr Müller, 67 Jahre. Erstkontakt im neuen Quartal, persönlicher Arzt-Patienten-Kontakt. Diabetes mellitus Typ 2 und arterielle Hypertonie werden weiter betreut. Patient berichtet über Belastungsdyspnoe beim Treppensteigen. Belastungs-Elektrokardiographie am Ergometer durchgeführt: Untersuchung in Ruhe und unter definierter Stufenbelastung, mindestens 12 Ableitungen in Ruhe sowie mindestens 3 Ableitungen während der Belastung, fortlaufende Kontrolle des Kurvenverlaufes, wiederholte Blutdruckmessung. Abbruchkriterien nicht erreicht, keine Ischämiezeichen unter Belastung.",
+  "dictation": "Herr Müller, 67 Jahre, persönlich in der Sprechstunde. Diabetes Typ 2 und den Bluthochdruck betreuen wir weiter. Er berichtet, ihm gehe beim Treppensteigen zunehmend die Puste aus, im zweiten Stock müsse er stehenbleiben; früher sei er da ohne Probleme hochgelaufen. Schmerzen in der Brust habe er dabei nicht, auch kein Herzstolpern. Das beschäftigt ihn, weil sein Bruder im gleichen Alter einen Infarkt hatte. Deshalb Belastungs-EKG auf dem Ergometer gefahren: erst in Ruhe mit zwölf Ableitungen, dann stufenweise belastet, während der Belastung durchgehend drei Ableitungen mitgeschrieben und den Kurvenverlauf verfolgt, Blutdruck immer wieder gemessen. Abbruchkriterien hat er nicht erreicht, Ischämiezeichen waren keine zu sehen. Ich hab ihm das Ergebnis erklärt, er war sichtlich erleichtert.",
   "expected_gops": [
     "03000",
     "03220",

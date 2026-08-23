@@ -7,10 +7,9 @@
     "gender": "F",
     "insurance": "BKK Freudenberg",
     "conditions": [],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": []
+    "prior_contacts": []
   },
-  "dictation": "Frau Fischer, 21 Jahre. Erstkontakt nach Fahrradunfall, persönlicher Arzt-Patienten-Kontakt. Keine chronischen Erkrankungen bekannt. Schürfwunde am linken Knie, ca. 4 cm², mit oberflächlichen Schmutzeinlagerungen. Wunde sorgfältig gereinigt und desinfiziert, Wundversorgung ohne Naht durchgeführt. Sterile Wundauflage und Verband angelegt. Tetanusstatus aktuell.",
+  "dictation": "Frau Fischer, 21 Jahre, kam persönlich nach einem Fahrradsturz von heute Vormittag, sie sei auf dem Schotterweg weggerutscht. Chronische Erkrankungen hat sie keine, Medikamente nimmt sie auch keine. Am linken Knie eine Schürfwunde von etwa vier Quadratzentimetern, oberflächlich, mit Schmutz drin; ansonsten ist sie unverletzt, das Knie lässt sich frei bewegen. Wunde gründlich gereinigt und desinfiziert, den Schmutz komplett rausgeholt. Genäht werden musste nichts, das war nicht nötig. Sterile Auflage und Verband drauf. Tetanus ist aktuell.",
   "expected_gops": [
     "03000",
     "02300"

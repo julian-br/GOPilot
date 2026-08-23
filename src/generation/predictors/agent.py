@@ -38,6 +38,9 @@ class AgentPredictor:
         self._close_resources = close_resources
 
     def predict(self, dictation: str, patient: Patient | None) -> RecommendationRun:
+        patient_context = format_patient_context(
+            patient, current_quarter=self._quarter
+        )
         output = self._agent.invoke(
             {
                 "messages": [
@@ -46,7 +49,8 @@ class AgentPredictor:
                         "content": (
                             f"Abrechnungsquartal: {self._quarter}\n\n"
                             f"Diktat:\n{dictation}\n\n"
-                            f"Patientenkontext:\n{format_patient_context(patient)}"
+                            "Patientenkontext:\n"
+                            f"{patient_context}"
                         ),
                     }
                 ]

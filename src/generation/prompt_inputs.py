@@ -1,24 +1,53 @@
 from langchain_core.documents import Document
 
-from src.patient import Patient
+from src.patient import Patient, PriorContact
 
 
-def format_patient_context(patient: Patient | None) -> str:
+def format_patient_context(
+    patient: Patient | None, current_quarter: str | None = None
+) -> str:
     if patient is None:
         return "Nicht verfuegbar."
-    previous_quarter_contacts = "\n".join(
-        f"- {contact.quarter}: {contact.contact_type} wegen {contact.reason}"
-        for contact in patient.previous_quarter_contacts
-    ) or "keine dokumentiert"
+
+    def format_contact(contact: PriorContact) -> str:
+        return (
+            f"- {contact.quarter}: {contact.contact_type} wegen {contact.reason}; "
+            f"abgerechnet: {', '.join(contact.billed_gops) or 'keine'}"
+        )
+
+    if current_quarter is None:
+        contact_context = "Bisherige Kontakte vor diesem Fall:\n" + (
+            "\n".join(format_contact(contact) for contact in patient.prior_contacts)
+            or "keine dokumentiert"
+        )
+    else:
+        current_contacts = [
+            contact
+            for contact in patient.prior_contacts
+            if contact.quarter == current_quarter
+        ]
+        historical_contacts = [
+            contact
+            for contact in patient.prior_contacts
+            if contact.quarter != current_quarter
+        ]
+        current_context = "\n".join(format_contact(contact) for contact in current_contacts)
+        historical_context = "\n".join(
+            format_contact(contact) for contact in historical_contacts
+        )
+        contact_context = (
+            f"Kontakte im Abrechnungsquartal {current_quarter} vor diesem Fall:\n"
+            f"{current_context or 'keine dokumentiert'}\n"
+            "Fruehere Kontakte (deren GOPs sind kein Abrechnungsausschluss im aktuellen Quartal):\n"
+            f"{historical_context or 'keine dokumentiert'}"
+        )
+
     return (
         f"Alter: {patient.age}\n"
         f"Geschlecht: {patient.gender}\n"
         f"Versicherung: {patient.insurance}\n"
         f"Bekannte Diagnosen: {', '.join(patient.conditions) or 'keine'}\n"
-        "Bereits in diesem Quartal abgerechnet: "
-        f"{', '.join(patient.billed_gops_current_quarter) or 'keine'}\n"
-        f"Erster Kontakt im Quartal: {'ja' if patient.first_contact else 'nein'}\n"
-        f"Kontakte in vorherigen Quartalen:\n{previous_quarter_contacts}"
+        f"{contact_context}"
     )
 
 

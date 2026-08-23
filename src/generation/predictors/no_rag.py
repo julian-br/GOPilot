@@ -26,7 +26,9 @@ class NoRagPredictor:
             {
                 "dictation": dictation,
                 "quarter": self.quarter,
-                "patient_context": format_patient_context(patient),
+                "patient_context": format_patient_context(
+                    patient, current_quarter=self.quarter
+                ),
             }
         )
 

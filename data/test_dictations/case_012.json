@@ -11,21 +11,22 @@
       "Herzinsuffizienz",
       "arterielle Hypertonie"
     ],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": [
+    "prior_contacts": [
       {
         "quarter": "2/2026",
         "contact_type": "persönlich",
-        "reason": "Herzinsuffizienz und arterielle Hypertonie"
+        "reason": "Herzinsuffizienz und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       },
       {
         "quarter": "3/2026",
         "contact_type": "persönlich",
-        "reason": "Herzinsuffizienz und arterielle Hypertonie"
+        "reason": "Herzinsuffizienz und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       }
     ]
   },
-  "dictation": "Frau Weber, 78 Jahre. Patientin kann wegen zunehmender Atemnot und geschwollener Beine die Praxis nicht aufsuchen. Hausbesuch in der eigenen Häuslichkeit, persönlicher Arzt-Patienten-Kontakt. Bekannte COPD und Herzinsuffizienz sowie arterielle Hypertonie werden versorgt. Körperliche Untersuchung: deutliche beiderseitige Knöchelödeme bis Unterschenkel, Atemfrequenz 22/min, Blutdruck 162/98, Herzfrequenz 98/min, basale Rasselgeräusche beidseits. Verdacht auf kardiale Dekompensation. Torasemid-Dosis von 10 auf 20 mg täglich erhöht.",
+  "dictation": "Frau Weber, 78 Jahre. Sie hat heute Morgen angerufen, sie komme wegen der Atemnot und der dicken Beine nicht mehr bis zur Praxis, sie schaffe die Treppe nicht mehr. Bin deshalb rausgefahren und hab sie bei sich zu Hause in der Wohnung gesehen. COPD, Herzinsuffizienz und der Bluthochdruck werden weiter von uns versorgt. Sie sagt, seit ein paar Tagen passten ihr die Schuhe nicht mehr und nachts müsse sie höher liegen. Bei der Untersuchung deutliche Knöchelödeme beidseits bis zum Unterschenkel hoch, Atemfrequenz 22, RR 162/98, Puls 98, über beiden Lungenbasen feuchte Rasselgeräusche. Sieht mir nach kardialer Dekompensation aus. Torasemid von 10 auf 20 Milligramm am Tag erhöht, das hab ich ihr aufgeschrieben und auf den Küchentisch gelegt.",
   "expected_gops": [
     "03000",
     "03220",

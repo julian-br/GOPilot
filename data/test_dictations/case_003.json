@@ -7,10 +7,9 @@
     "gender": "F",
     "insurance": "TK",
     "conditions": [],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": []
+    "prior_contacts": []
   },
-  "dictation": "Frau Schmidt, 34 Jahre. Erstkontakt dieses Quartal, persönlicher Arzt-Patienten-Kontakt. Seit drei Tagen Halsschmerzen und Fieber 38,8 Grad. Körperliche Untersuchung: Rachen gerötet, Tonsillen vergrößert mit weißlichen Belägen. Streptokokken-A-Schnelltest als orientierende Untersuchung mit visueller Auswertung eines vorgefertigten Reagenzträgers durchgeführt, positiv. Penicillin V verordnet, Arbeitsunfähigkeit bescheinigt.",
+  "dictation": "Frau Schmidt, 34 Jahre, war heute persönlich da. Seit drei Tagen Halsschmerzen und Fieber bis 38,8, sie sagt, das Schlucken tue richtig weh, sie bekomme kaum etwas runter und komme so nicht durch den Arbeitstag. Sie arbeitet im Kindergarten, da gehe im Moment einiges rum. Rachen deutlich gerötet, die Mandeln geschwollen mit weißlichen Belägen, die Lymphknoten am Kieferwinkel druckschmerzhaft. Streptokokken-Schnelltest gemacht, so ein Teststreifen zum Ablesen, der war eindeutig positiv. Penicillin V verordnet, Einnahme und Dauer mit ihr durchgegangen, vor allem dass sie die Packung zu Ende nimmt. Krankschreibung hat sie bekommen, sie meldet sich, wenn es bis Ende der Woche nicht deutlich besser ist.",
   "expected_gops": [
     "03000",
     "32030"

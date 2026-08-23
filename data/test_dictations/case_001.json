@@ -10,24 +10,28 @@
       "Diabetes mellitus Typ 2",
       "arterielle Hypertonie"
     ],
-    "billed_gops_current_quarter": [
-      "03000",
-      "03220"
-    ],
-    "previous_quarter_contacts": [
+    "prior_contacts": [
+      {
+        "quarter": "4/2026",
+        "contact_type": "persönlich",
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000", "03220"]
+      },
       {
         "quarter": "2/2026",
         "contact_type": "persönlich",
-        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       },
       {
         "quarter": "3/2026",
         "contact_type": "persönlich",
-        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       }
     ]
   },
-  "dictation": "Herr Müller, 67 Jahre, persönlicher Kontrolltermin wegen Diabetes Typ 2 und Hypertonie. Es ist der zweite persönliche Arzt-Patienten-Kontakt in diesem Quartal. Blutdruck heute 152/94, Ramipril von 5 mg auf 10 mg erhöht. Blutzucker nüchtern 138 mg/dl, Diabetestagebuch besprochen. Rezept ausgestellt.",
+  "dictation": "Herr Müller, 67 Jahre, war heute wieder persönlich da, Kontrolltermin wegen seinem Diabetes und dem Bluthochdruck. Er sagt, er komme im Alltag ganz gut zurecht, nur nachmittags sei er öfter müde. Blutdruck heute 152/94, das ist mir zu hoch, das Ramipril hab ich deshalb von 5 auf 10 Milligramm hochgesetzt und mit ihm besprochen, worauf er achten soll. Nüchternblutzucker 138. Sein Diabetestagebuch sind wir zusammen durchgegangen, die Werte schwanken vor allem am Wochenende, da isst er unregelmäßiger. Rezept hat er mitbekommen.",
   "expected_gops": [
     "03221"
   ]

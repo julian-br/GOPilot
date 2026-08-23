@@ -10,24 +10,28 @@
       "Diabetes mellitus Typ 2",
       "arterielle Hypertonie"
     ],
-    "billed_gops_current_quarter": [
-      "03000",
-      "03220"
-    ],
-    "previous_quarter_contacts": [
+    "prior_contacts": [
+      {
+        "quarter": "4/2026",
+        "contact_type": "persönlich",
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000", "03220"]
+      },
       {
         "quarter": "2/2026",
         "contact_type": "persönlich",
-        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       },
       {
         "quarter": "3/2026",
         "contact_type": "persönlich",
-        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       }
     ]
   },
-  "dictation": "Herr Müller, 67 Jahre. Zweiter persönlicher Arzt-Patienten-Kontakt im Quartal, Versichertenpauschale und Chronikerpauschale sind bereits abgerechnet. Anlass: neu aufgetretene Taubheitsgefühle und Kribbeln in beiden Füßen. Problemorientiertes ärztliches Gespräch aufgrund der Art und Schwere der Erkrankung, Dauer 12 Minuten: Erörterung einer Polyneuropathie als mögliche Metformin-Nebenwirkung, Diskussion von Therapiealternativen und Stellenwert der Vitamin-B12-Substitution. Metformin von 2000 auf 500 mg täglich reduziert, Vitamin-B12-Substitution verordnet. Therapieanpassung und Überprüfung der leitliniengestützten Dauermedikation dokumentiert.",
+  "dictation": "Herr Müller, 67 Jahre, war persönlich da. Er hat neu Taubheitsgefühle und ein Kribbeln in beiden Füßen, das habe vor ein paar Wochen angefangen, abends sei es am schlimmsten, und es macht ihm sichtlich Sorgen. Er hat im Bekanntenkreis mitbekommen, dass so etwas beim Diabetes schlecht ausgehen kann, und wollte das unbedingt besprechen. Wir haben uns deswegen ausführlich unterhalten, so zwölf Minuten: dass das eine Polyneuropathie sein kann, möglicherweise als Nebenwirkung vom Metformin, welche Alternativen es gibt und was Vitamin B12 dabei bringt. Metformin von 2000 auf 500 Milligramm am Tag runtergesetzt, Vitamin B12 verordnet. Die Dauermedikation hab ich bei der Gelegenheit komplett durchgesehen und die Anpassung dokumentiert. Kontrolle in sechs Wochen vereinbart.",
   "expected_gops": [
     "03221",
     "03230"

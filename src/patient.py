@@ -2,10 +2,11 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class PreviousQuarterContact:
+class PriorContact:
     quarter: str
     contact_type: str
     reason: str
+    billed_gops: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -15,9 +16,4 @@ class Patient:
     gender: str
     insurance: str
     conditions: tuple[str, ...]
-    billed_gops_current_quarter: tuple[str, ...]
-    previous_quarter_contacts: tuple[PreviousQuarterContact, ...]
-
-    @property
-    def first_contact(self) -> bool:
-        return not self.billed_gops_current_quarter
+    prior_contacts: tuple[PriorContact, ...]

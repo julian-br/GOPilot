@@ -47,3 +47,7 @@ Open http://127.0.0.1:5000 in the browser.
 Each test case is an independent snapshot. Its patient history is fixed input and is never updated
 with recommendations from another case. `expected_gops` contains GOPs the physician should actively
 submit or recommend; GOPs added automatically by the KV are outside the evaluation scope.
+
+TODO:
+
+Retrieval liegt außerhalb der Chain in rag.py:22. self.retriever.invoke(dictation) läuft vor der Chain, wird also kein Kind-Span von "recommendation". LangChain-idiomatischer wäre RunnablePassthrough.assign(candidates=...), dann hättest du den Retrieval-Schritt im selben Trace. Nebenbei wird die Chain in rag.py und no_rag.py bei jedem predict() neu zusammengesetzt, statt einmal im Konstruktor.

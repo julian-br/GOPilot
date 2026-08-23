@@ -9,21 +9,22 @@
     "conditions": [
       "Asthma bronchiale"
     ],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": [
+    "prior_contacts": [
       {
         "quarter": "2/2026",
         "contact_type": "persönlich",
-        "reason": "Asthma bronchiale"
+        "reason": "Asthma bronchiale",
+        "billed_gops": ["03000"]
       },
       {
         "quarter": "3/2026",
         "contact_type": "persönlich",
-        "reason": "Asthma bronchiale"
+        "reason": "Asthma bronchiale",
+        "billed_gops": ["03000"]
       }
     ]
   },
-  "dictation": "Frau Kaya, 41 Jahre. Erstkontakt im Quartal, persönlicher Arzt-Patienten-Kontakt. Bekanntes Asthma bronchiale als lebensverändernde chronische Erkrankung; Patientin klagt über zunehmende Belastungsdyspnoe seit zwei Wochen. Spirographische Untersuchung durchgeführt: Darstellung der Flussvolumenkurve, in- und exspiratorische Messungen mit graphischer Registrierung; FEV1/FVC 0,72, FVC 94 % des Sollwerts. Inhalationstherapie optimiert, neues LABA-Präparat verordnet.",
+  "dictation": "Frau Kaya, 41 Jahre, war persönlich da. Ihr Asthma bronchiale betreuen wir hier fortlaufend, das schränkt sie im Alltag dauerhaft ein. Sie klagt seit etwa zwei Wochen über zunehmende Luftnot bei Belastung, beim Sport gehe gar nichts mehr, und auch nachts wache sie manchmal mit Husten auf. Zeitlich falle das mit dem Umzug in die neue Wohnung zusammen, meint sie. Lungenfunktion gemacht: Fluss-Volumen-Kurve aufgezeichnet, Ein- und Ausatmung gemessen und graphisch festgehalten, FEV1 zu FVC 0,72, FVC 94 Prozent vom Soll. Inhalationstherapie umgestellt, ein neues LABA verordnet und die Anwendung mit ihr durchgegangen, sie soll sich in vier Wochen wieder vorstellen.",
   "expected_gops": [
     "03000",
     "03220",

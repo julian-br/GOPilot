@@ -10,10 +10,9 @@
       "Herzrhythmusstörungen",
       "koronare Herzkrankheit"
     ],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": []
+    "prior_contacts": []
   },
-  "dictation": "Herr Sommer, 78 Jahre. Erstkontakt in der Hausarztpraxis, persönlicher Arzt-Patienten-Kontakt. Bekannte Herzrhythmusstörungen und koronare Herzkrankheit. Patient klagt über gelegentliches Herzstolpern in Ruhe. Genehmigung der KV zur Durchführung langzeitelektrokardiographischer Untersuchungen liegt vor. Langzeit-EKG-Gerät angelegt und eingestellt, Aufzeichnungsstart; Aufzeichnungsdauer 24 Stunden. Patient gibt das Gerät am nächsten Tag zurück; computergestützte Auswertung des kontinuierlich aufgezeichneten Langzeit-EKG von mehr als 18 Stunden Dauer und Befundbeurteilung durchgeführt: vereinzelte supraventrikuläre Extrasystolen, keine signifikanten tachykarden oder bradykarden Episoden.",
+  "dictation": "Herr Sommer, 78 Jahre, war persönlich in der Hausarztpraxis. Bekannt sind Herzrhythmusstörungen und eine koronare Herzkrankheit. Er berichtet über gelegentliches Herzstolpern, meist abends in Ruhe, wenn er vor dem Fernseher sitze; es dauere jeweils nur ein paar Sekunden. Schwindelig sei ihm dabei nicht geworden, umgekippt sei er auch nie. Seine Frau habe ihn gedrängt, das endlich abklären zu lassen. Die Genehmigung der KV für Langzeit-EKGs liegt bei uns vor. Gerät angelegt und eingestellt, Aufzeichnung gestartet, sie sollte vierundzwanzig Stunden laufen; ich hab ihm erklärt, dass er sich ganz normal bewegen und die Zeiten notieren soll. Am nächsten Tag hat er es zurückgebracht, die Aufzeichnung lief durchgehend, deutlich über achtzehn Stunden. Am Rechner ausgewertet und befundet: vereinzelte supraventrikuläre Extrasystolen, sonst nichts, keine relevanten schnellen oder langsamen Episoden. Das Ergebnis hab ich ihm mitgeteilt.",
   "expected_gops": [
     "03000",
     "03322",

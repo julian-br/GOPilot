@@ -11,19 +11,24 @@
       "Herzinsuffizienz",
       "arterielle Hypertonie"
     ],
-    "billed_gops_current_quarter": [
-      "03000"
-    ],
-    "previous_quarter_contacts": [
+    "prior_contacts": [
+      {
+        "quarter": "4/2026",
+        "contact_type": "persönlich",
+        "reason": "COPD",
+        "billed_gops": ["03000"]
+      },
       {
         "quarter": "3/2026",
         "contact_type": "persönlich",
-        "reason": "COPD"
+        "reason": "COPD",
+        "billed_gops": ["03000"]
       }
     ]
   },
-  "dictation": "Frau Weber, 78 Jahre. Persönlicher Hausarzttermin wegen akuter Verschlechterung der Luftnot bei bekannter COPD. Die Versichertenpauschale ist in diesem Quartal bereits abgerechnet. Körperliche Untersuchung mit RR 168/98 und Herzfrequenz 112. Spirographische Untersuchung durchgeführt mit Darstellung der Flussvolumenkurve, in- und exspiratorischen Messungen und graphischer Registrierung; FEV1/FVC 0,61. Zusätzlich Infusion Furosemid 40 mg intravenös über 20 Minuten angelegt, Patientin stabilisiert.",
+  "dictation": "Frau Weber, 78 Jahre, kam heute persönlich in die Praxis, die Luftnot hat sich bei ihrer bekannten COPD deutlich verschlechtert. Sie sagt, schon der Weg vom Auto zur Tür sei anstrengend gewesen, sie habe zweimal stehenbleiben müssen; seit dem Wetterumschwung sei es schlimmer geworden. RR 168/98, Puls 112, sie atmet sichtbar angestrengt und spricht in kurzen Sätzen. Lungenfunktion gemacht: Fluss-Volumen-Kurve aufgezeichnet, Ein- und Ausatmung gemessen und die Kurve ausgedruckt, FEV1 zu FVC 0,61. Danach hab ich ihr noch Furosemid 40 als Infusion gegeben, lief über zwanzig Minuten, sie hat das gut vertragen und war anschließend deutlich stabiler, die Atmung ruhiger.",
   "expected_gops": [
+    "02100",
     "03330"
   ]
 }

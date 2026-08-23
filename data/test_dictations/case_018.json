@@ -10,24 +10,28 @@
       "Diabetes mellitus Typ 2",
       "arterielle Hypertonie"
     ],
-    "billed_gops_current_quarter": [
-      "03000",
-      "03220"
-    ],
-    "previous_quarter_contacts": [
+    "prior_contacts": [
+      {
+        "quarter": "4/2026",
+        "contact_type": "persönlich",
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000", "03220"]
+      },
       {
         "quarter": "2/2026",
         "contact_type": "persönlich",
-        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       },
       {
         "quarter": "3/2026",
         "contact_type": "persönlich",
-        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie"
+        "reason": "Diabetes mellitus Typ 2 und arterielle Hypertonie",
+        "billed_gops": ["03000"]
       }
     ]
   },
-  "dictation": "Herr Müller, 67 Jahre. Zweiter persönlicher Arzt-Patienten-Kontakt im Quartal, Versichertenpauschale und Chronikerpauschale sind bereits abgerechnet. Kontrolle nach Metoprolol-Neueinstellung wegen Belastungsdyspnoe. Belastungs-Elektrokardiographie am Ergometer: Untersuchung in Ruhe und unter Stufenbelastung, mindestens 12 Ableitungen in Ruhe, mindestens 3 Ableitungen unter Belastung, fortlaufende Kontrolle des Kurvenverlaufes, wiederholte Blutdruckmessung; keine Ischämiezeichen, Herzfrequenz unter Belastung jetzt adäquat begrenzt. Metoprolol 25 mg beibehalten; Überprüfung der leitliniengestützten Dauermedikation dokumentiert.",
+  "dictation": "Herr Müller, 67 Jahre, persönlich zur Kontrolle nach der Metoprolol-Neueinstellung wegen der Belastungsluftnot. Er sagt, das Treppensteigen gehe jetzt spürbar besser, er komme wieder ohne Pause in den zweiten Stock. Nebenwirkungen seien ihm keine aufgefallen, nur morgens komme er etwas langsamer in Gang. Belastungs-EKG auf dem Ergometer gefahren: in Ruhe zwölf Ableitungen, dann stufenweise belastet, unter Belastung durchgehend drei Ableitungen mitgeschrieben, den Kurvenverlauf verfolgt und wiederholt den Blutdruck gemessen. Ischämiezeichen keine, die Herzfrequenz wird unter Belastung jetzt gut begrenzt. Metoprolol bleibt bei 25 Milligramm. Die leitliniengestützte Dauermedikation hab ich durchgesehen und das dokumentiert. Wiedervorstellung in drei Monaten.",
   "expected_gops": [
     "03221",
     "03321"

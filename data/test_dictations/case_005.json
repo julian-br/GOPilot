@@ -7,10 +7,9 @@
     "gender": "M",
     "insurance": "DAK-Gesundheit",
     "conditions": [],
-    "billed_gops_current_quarter": [],
-    "previous_quarter_contacts": []
+    "prior_contacts": []
   },
-  "dictation": "Herr Becker, 50 Jahre. Kein persönlicher Arzt-Patienten-Kontakt und keine telefonische ärztliche Beratung in diesem Quartal. Auf Wunsch des Patienten wurden ein Wiederholungsrezept für die Dauermedikation und eine Überweisung zum Orthopäden ausgestellt. Es erfolgte nur die Verwaltungstätigkeit ohne Untersuchung.",
+  "dictation": "Herr Becker, 50 Jahre. Er hat in der Praxis anrufen lassen und um sein Wiederholungsrezept für die Dauermedikation gebeten, außerdem braucht er eine Überweisung zum Orthopäden. Beides hab ich ausgestellt und rausgelegt, er holt es sich ab. Gesehen hab ich ihn dabei nicht und gesprochen auch nicht, untersucht ohnehin nicht. Es war reine Verwaltungsarbeit.",
   "expected_gops": [
     "01430"
   ]
