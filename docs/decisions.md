@@ -45,3 +45,9 @@ LLM calls are isolated behind `src.generation.client.open_chat_model`, with prom
 output schemas in separate modules. The first provider is local Ollama, using `qwen3:4b`, but the
 recommendation code receives a LangChain chat model so cloud providers can be swapped in later.
 Initial evaluation measures the LLM without retrieval as a baseline.
+
+**010 — Gemma 4 E4B for local generation** (2026-08-23)
+Use `gemma4:e4b` for the agent, RAG, and no-RAG configurations. `qwen3.5` repeatedly entered
+long tool and reasoning loops during agent runs, including a single generation exceeding 50,000
+tokens. E4B terminates reliably with structured responses in the same setup. This is a stability
+choice; retrieval quality and billing-rule interpretation still need improvement.

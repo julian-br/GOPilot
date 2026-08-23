@@ -7,6 +7,7 @@ from typing import Any
 
 import mlflow
 import mlflow.langchain
+import mlflow.openai
 from mlflow.entities import SpanStatusCode
 
 from src.config import DEFAULT_CONFIG, Config, RetrievalConfig, load_config
@@ -100,6 +101,7 @@ def main(config: Config, limit: int | None = None) -> dict[str, float]:
     run_name = f"{strategy}-{config.llm_model}"
     with mlflow.start_run(run_name=run_name):
         mlflow.langchain.autolog(log_traces=True)
+        mlflow.openai.autolog(log_traces=True)
         config_values = config.model_dump()
         mlflow.log_params(config_values)
         mlflow.log_dict(config_values, "config.json")
