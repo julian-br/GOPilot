@@ -30,7 +30,7 @@ class BaseConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
     experiment: str
-    llm_provider: Literal["ollama"]
+    llm_provider: Literal["ollama", "openrouter"]
     llm_model: str
 
 

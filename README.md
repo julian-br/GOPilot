@@ -62,3 +62,14 @@ comparison during development, not a claim of clinical or billing accuracy.
 
 The RAG run had one structured-output validation error; the other 19 cases completed. All 20
 agent cases completed without an execution error.
+
+### Cloud-model comparison
+
+The following runs use the same 20 test dictations, catalogue collection and prompts. They are
+also preliminary and measure agreement with the current `expected_gops` labels only.
+
+| Model | Strategy | Precision | Recall | F1 | Error rate |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `stealth/ox-alpha` | Agent | 0.811 | 0.811 | 0.811 | 0.000 |
+| `nvidia/nemotron-3.5-lightning:free` | Agent | 0.577 | 0.405 | 0.476 | 0.000 |
+| `nvidia/nemotron-3.5-lightning:free` | RAG | 0.800 | 0.324 | 0.462 | 0.000 |

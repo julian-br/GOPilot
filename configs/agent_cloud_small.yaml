@@ -1,0 +1,8 @@
+experiment: default
+ebm_collection: ebm_2026_q4
+generation_strategy: agent
+llm_provider: openrouter
+llm_model: nvidia/nemotron-3.5-lightning:free
+practice_specialty: "001"
+retriever: hybrid
+top_k: 10

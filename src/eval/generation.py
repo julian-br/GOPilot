@@ -1,6 +1,7 @@
 """How well does a generation strategy recommend expected GOPs?"""
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from time import perf_counter
 from typing import Any
@@ -17,56 +18,81 @@ from src.generation.predictors import Predictor, build_predictor
 CaseResults = dict[str, dict[str, Any]]
 
 
-def evaluate_cases(predictor: Predictor, cases: list[Case]) -> CaseResults:
-    results = {}
-    for index, case in enumerate(cases, 1):
-        start = perf_counter()
-        with mlflow.start_span(
-            "generation_case",
-            attributes={
-                "case_id": case.case_id,
-                "case_index": index,
-                "cases": len(cases),
-                "patient_id": case.patient.id,
-                "expected": list(case.expected),
-            },
-        ) as span:
-            error = None
-            try:
-                result = predictor.predict(case.dictation, case.patient)
-                predictions = [
-                    {"code": recommendation.code, "reason": recommendation.reason}
-                    for recommendation in result.recommendations
-                ]
-            except Exception as exc:
-                predictions = []
-                error = f"{type(exc).__name__}: {exc}"
-                span.record_exception(exc)
-                span.set_status(SpanStatusCode.ERROR)
+def evaluate_case(
+    predictor: Predictor,
+    case: Case,
+    index: int,
+    case_count: int,
+) -> tuple[str, dict[str, Any]]:
+    start = perf_counter()
+    with mlflow.start_span(
+        "generation_case",
+        attributes={
+            "case_id": case.case_id,
+            "case_index": index,
+            "cases": case_count,
+            "patient_id": case.patient.id,
+            "expected": list(case.expected),
+        },
+    ) as span:
+        error = None
+        try:
+            result = predictor.predict(case.dictation, case.patient)
+            predictions = [
+                {"code": recommendation.code, "reason": recommendation.reason}
+                for recommendation in result.recommendations
+            ]
+        except Exception as exc:
+            predictions = []
+            error = f"{type(exc).__name__}: {exc}"
+            span.record_exception(exc)
+            span.set_status(SpanStatusCode.ERROR)
 
-            predicted = {p["code"] for p in predictions}
-            expected = set(case.expected)
-            case_result = {
-                "expected": list(case.expected),
-                "predicted": predictions,
-                "true_positive": [code for code in case.expected if code in predicted],
-                "false_positive": [
-                    p["code"] for p in predictions if p["code"] not in expected
-                ],
-                "false_negative": [code for code in case.expected if code not in predicted],
-            }
-            if error is not None:
-                case_result["error"] = error
-            elapsed = perf_counter() - start
-            span.set_outputs(case_result)
-            span.set_attribute("duration_seconds", elapsed)
-            results[case.case_id] = case_result
-        status = " ERROR" if error is not None else ""
-        print(
-            f"[{index}/{len(cases)}] {case.case_id} {elapsed:.1f}s{status}",
-            flush=True,
+        predicted = {p["code"] for p in predictions}
+        expected = set(case.expected)
+        case_result = {
+            "expected": list(case.expected),
+            "predicted": predictions,
+            "true_positive": [code for code in case.expected if code in predicted],
+            "false_positive": [
+                p["code"] for p in predictions if p["code"] not in expected
+            ],
+            "false_negative": [code for code in case.expected if code not in predicted],
+        }
+        if error is not None:
+            case_result["error"] = error
+        elapsed = perf_counter() - start
+        span.set_outputs(case_result)
+        span.set_attribute("duration_seconds", elapsed)
+    status = " ERROR" if error is not None else ""
+    print(
+        f"[{index}/{case_count}] {case.case_id} {elapsed:.1f}s{status}",
+        flush=True,
+    )
+    return case.case_id, case_result
+
+
+def evaluate_cases(
+    predictor: Predictor,
+    cases: list[Case],
+    parallel: bool = False,
+) -> CaseResults:
+    indexed_cases = list(enumerate(cases, 1))
+    if not indexed_cases:
+        return {}
+    if not parallel:
+        return dict(
+            evaluate_case(predictor, case, index, len(cases))
+            for index, case in indexed_cases
         )
-    return results
+
+    with ThreadPoolExecutor(max_workers=len(cases)) as executor:
+        futures = [
+            executor.submit(evaluate_case, predictor, case, index, len(cases))
+            for index, case in indexed_cases
+        ]
+        completed = dict(future.result() for future in as_completed(futures))
+    return {case.case_id: completed[case.case_id] for case in cases}
 
 
 def classification_metrics(results: CaseResults) -> dict[str, float]:
@@ -84,7 +110,11 @@ def classification_metrics(results: CaseResults) -> dict[str, float]:
     }
 
 
-def main(config: Config, limit: int | None = None) -> dict[str, float]:
+def main(
+    config: Config,
+    limit: int | None = None,
+    parallel: bool = False,
+) -> dict[str, float]:
     cases = load_cases()
     if limit is not None:
         cases = cases[:limit]
@@ -108,7 +138,7 @@ def main(config: Config, limit: int | None = None) -> dict[str, float]:
 
         predictor = build_predictor(config)
         try:
-            results = evaluate_cases(predictor, cases)
+            results = evaluate_cases(predictor, cases, parallel=parallel)
         finally:
             predictor.close()
         errors = sum("error" in result for result in results.values())
@@ -129,10 +159,17 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--limit", type=int)
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="evaluate all selected cases concurrently",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    for name, value in main(load_config(args.config), limit=args.limit).items():
+    for name, value in main(
+        load_config(args.config), limit=args.limit, parallel=args.parallel
+    ).items():
         print(f"  {name:<16} {value:.3f}")
