@@ -1,7 +1,7 @@
 from typing import Callable
 
 from langchain.agents import create_agent
-from langchain.agents.structured_output import ProviderStrategy
+from langchain.agents.structured_output import ToolStrategy
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.retrievers import BaseRetriever
 from langchain_qdrant import QdrantVectorStore
@@ -30,7 +30,13 @@ class AgentPredictor:
                 build_get_gop_tool(store, specialty),
             ],
             system_prompt=AGENT_SYSTEM_PROMPT,
-            response_format=ProviderStrategy(RecommendationResult),
+            response_format=ToolStrategy(
+                RecommendationResult,
+                handle_errors=(
+                    "Die letzte Empfehlung ist ungueltig. Jeder GOP-Code muss genau "
+                    "fuenf Ziffern haben. Gib nur bestaetigte GOPs zurueck."
+                ),
+            ),
             name="billing_agent",
         )
         self._quarter = quarter
