@@ -46,6 +46,9 @@ logs/
 # Eval reports (generated, not versioned)
 reports/
 
+# Local diagnostic scripts and traces
+sandbox/
+
 .claude
 
 # KBV master data: licensed for use, not redistribution

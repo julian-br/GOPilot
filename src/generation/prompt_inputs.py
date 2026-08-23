@@ -30,9 +30,10 @@ def format_patient_context(
         format_contact(contact) for contact in historical_contacts
     )
     contact_context = (
-        f"Kontakte im Abrechnungsquartal {current_quarter} vor diesem Fall:\n"
+        f"Vergangene Kontakte im Abrechnungsquartal {current_quarter} vor dem aktuellen, "
+        "abzurechnenden Besuch:\n"
         f"{current_context or 'keine dokumentiert'}\n"
-        "Fruehere Kontakte (deren GOPs sind kein Abrechnungsausschluss im aktuellen Quartal):\n"
+        "Vergangene Kontakte aus frueheren Quartalen (kein aktueller Besuch):\n"
         f"{historical_context or 'keine dokumentiert'}"
     )
 

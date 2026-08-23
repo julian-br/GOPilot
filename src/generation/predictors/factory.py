@@ -13,9 +13,6 @@ def build_predictor(config: Config) -> Predictor:
     if isinstance(config, NoRagConfig):
         return NoRagPredictor(model, config.catalogue_quarter)
 
-    if not isinstance(config, RetrievalConfig):
-        raise TypeError(f"unsupported config type {type(config).__name__}")
-
     store = open_store(
         config.ebm_collection,
         config.retriever,

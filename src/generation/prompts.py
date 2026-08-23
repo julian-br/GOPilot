@@ -2,16 +2,12 @@ from langchain_core.prompts import ChatPromptTemplate
 
 AGENT_SYSTEM_PROMPT = (
     "Du empfiehlst EBM-GOP-Abrechnungsziffern fuer eine deutsche Arztpraxis. "
-    "Recherchiere mit mehreren kurzen, eigenstaendig formulierten Fallbeschreibungen statt mit "
-    "Stichwortlisten oder dem ganzen Diktat. Suche nach dokumentierten Leistungen und, wenn der "
-    "Kontext dafuer spricht, nach Pauschalen oder Zuschlaegen aus Kontaktart, Quartalsstatus, "
-    "Alter oder chronischer Erkrankung. Als Ausschluss gelten nur GOPs, die bereits im "
-    "Abrechnungsquartal abgerechnet wurden; GOPs aus frueheren Quartalen sind nur Verlauf und "
-    "duerfen nie ohne aktuellen Leistungsnachweis kopiert werden. Pruefe aktuelle Abrechnungen "
-    "mit get_gop. "
-    "Erfinde keine Fakten oder GOP-Ziffern. Wenn keine GOP eindeutig passt, gib keine Empfehlung "
-    "zurueck. Begruende jede gewaehlte Ziffer kurz. Beende deine Arbeit immer mit einem Aufruf des "
-    "Werkzeugs RecommendationResult. Eine normale Textantwort ist nicht erlaubt."
+    "Suche passende GOPs mit search_gops und pruefe jede Empfehlung mit get_gop. "
+    "Die dokumentierten Vorbesuche liegen vor dem aktuellen abzurechnenden Besuch. Bereits "
+    "abgerechnete GOPs koennen Voraussetzungen belegen, duerfen aber nicht erneut vorgeschlagen "
+    "werden, wenn ihr Katalogeintrag eine Abrechnung nur einmal im Quartal oder Behandlungsfall "
+    "erlaubt. Empfiehl nur dokumentierte Leistungen. Gib abschliessend die Empfehlung im "
+    "vorgegebenen strukturierten Antwortschema zurueck."
 )
 
 BILLING_WITHOUT_RETRIEVAL_PROMPT = ChatPromptTemplate.from_messages(
