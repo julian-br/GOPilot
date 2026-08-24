@@ -6,8 +6,7 @@ EBM catalogue.
 
 GOPilot is an exploratory project for understanding how language models and EBM catalogue
 retrieval can support billing-code recommendations. The project is currently being refactored around
-LangChain and remains under active development. It is intended for experimentation and evaluation,
-rather than production use.
+LangChain. It is intended for experimentation and evaluation, rather than production use.
 
 An earlier, more prescriptive workflow achieved promising results on a small evaluation set, but it
 was too biased towards anticipated billing codes. The current iteration rebuilds the pipeline around
