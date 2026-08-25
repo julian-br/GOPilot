@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
-from concurrent.futures import ThreadPoolExecutor
-from typing import Callable
+from typing import Callable, TypedDict
 
 from langchain_core.documents import Document
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.retrievers import BaseRetriever
+from langgraph.graph import StateGraph
 
 from src.generation.prompt_inputs import format_candidates, format_patient_context
 from src.generation.predictors.workflow.prompts import (
@@ -36,6 +36,17 @@ GENERAL_DEFINITIONS = {
 }
 
 
+class WorkflowState(TypedDict, total=False):
+    dictation: str
+    context: str
+    services: list[str]
+    service_candidates: list[tuple[str, list[Document]]]
+    flat_candidates: list[Document]
+    service_results: list[RecommendationResult]
+    flat_result: RecommendationResult
+    result: RecommendationResult
+
+
 def _case_context(patient: Patient | None, quarter: str) -> str:
     return (
         "Praxisart: Hausarztpraxis\n" # TODO: Avoid hardcoding
@@ -44,15 +55,13 @@ def _case_context(patient: Patient | None, quarter: str) -> str:
     )
 
 
-def _add_offered(
+def _add_unique(
     target: list[Recommendation],
     seen: set[str],
     result: RecommendationResult,
-    candidates: list[Document],
 ) -> None:
-    offered = {str(candidate.metadata["code"]) for candidate in candidates}
     for recommendation in result.recommendations:
-        if recommendation.code in offered and recommendation.code not in seen:
+        if recommendation.code not in seen:
             seen.add(recommendation.code)
             target.append(recommendation)
 
@@ -93,28 +102,33 @@ class WorkflowPredictor:
         self._max_services = max_services
         self._max_candidates = max_candidates_per_path
         self._close_resources = close_resources
+        self._graph = self._build_graph()
 
-    def _understand_services(self, dictation: str) -> list[str]:
-        result = self._understanding_chain.invoke({"dictation": dictation})
-        if not isinstance(result, PerformedServices):
-            raise TypeError("workflow did not return performed services")
-        descriptions: list[str] = []
-        seen: set[str] = set()
-        for service in result.performed_services:
-            description = " ".join(service.description.split())
-            key = description.casefold()
-            if description and key not in seen:
-                seen.add(key)
-                descriptions.append(description)
-            if len(descriptions) >= self._max_services:
-                break
-        return descriptions
+    def _build_graph(self):
+        graph = StateGraph(WorkflowState).add_sequence(
+            [
+                ("understand_services", self._understand_services),
+                ("retrieve_services", self._retrieve_service_candidates),
+                ("retrieve_flat_rates", self._retrieve_flat_candidates),
+                ("select_services", self._select_services),
+                ("select_flat_rates", self._select_flat_rates),
+                ("merge_recommendations", self._merge_recommendations),
+            ]
+        )
+        graph.set_entry_point("understand_services")
+        graph.set_finish_point("merge_recommendations")
+        return graph.compile()
+
+    def _understand_services(self, state: WorkflowState) -> WorkflowState:
+        result = self._understanding_chain.invoke({"dictation": state["dictation"]})
+        services = result.performed_services[: self._max_services]
+        return {"services": [service.description for service in services]}
 
     def _retrieve_service_candidates(
         self,
-        services: list[str],
-    ) -> list[tuple[str, list[Document]]]:
-        return [
+        state: WorkflowState,
+    ) -> WorkflowState:
+        candidates = [
             (
                 service,
                 self._retriever.invoke(
@@ -122,10 +136,11 @@ class WorkflowPredictor:
                     config={"run_name": "retrieve_workflow_service"},
                 )[: self._max_candidates],
             )
-            for service in services
+            for service in state["services"]
         ]
+        return {"service_candidates": candidates}
 
-    def _retrieve_flat_candidates(self) -> list[Document]:
+    def _retrieve_flat_candidates(self, _: WorkflowState) -> WorkflowState:
         candidates: list[Document] = []
         seen: set[str] = set()
         for query in FLAT_RATE_QUERIES:
@@ -140,92 +155,64 @@ class WorkflowPredictor:
                 seen.add(code)
                 candidates.append(candidate)
                 if len(candidates) >= self._max_candidates:
-                    return candidates
-        return candidates
+                    return {"flat_candidates": candidates}
+        return {"flat_candidates": candidates}
 
     def _select_services(
         self,
-        service_candidates: list[tuple[str, list[Document]]],
-        dictation: str,
-        context: str,
-    ) -> list[RecommendationResult]:
-        def select(item: tuple[str, list[Document]]) -> RecommendationResult:
-            service, candidates = item
+        state: WorkflowState,
+    ) -> WorkflowState:
+        results: list[RecommendationResult] = []
+        for service, candidates in state["service_candidates"]:
             result = self._service_selection_chain.invoke(
                 {
-                    "case_context": context,
-                    "dictation": dictation,
+                    "case_context": state["context"],
+                    "dictation": state["dictation"],
                     "service": service,
                     "candidates": format_candidates(candidates),
                 }
             )
-            if not isinstance(result, RecommendationResult):
-                raise TypeError("workflow did not return service recommendations")
-            return result
-
-        with ThreadPoolExecutor(max_workers=min(5, len(service_candidates))) as executor:
-            return list(executor.map(select, service_candidates))
+            results.append(result)
+        return {"service_results": results}
 
     def _select_flat_rates(
         self,
-        candidates: list[Document],
-        dictation: str,
-        context: str,
-    ) -> RecommendationResult:
+        state: WorkflowState,
+    ) -> WorkflowState:
+        candidates = state["flat_candidates"]
+        if not candidates:
+            return {"flat_result": RecommendationResult(recommendations=[])}
         result = self._flat_rate_selection_chain.invoke(
             {
-                "case_context": context,
+                "case_context": state["context"],
                 "definitions": json.dumps(
                     GENERAL_DEFINITIONS,
                     ensure_ascii=False,
                     indent=2,
                 ),
-                "dictation": dictation,
+                "dictation": state["dictation"],
                 "candidates": format_candidates(candidates),
             }
         )
-        if not isinstance(result, RecommendationResult):
-            raise TypeError("workflow did not return flat-rate recommendations")
-        return result
+        return {"flat_result": result}
 
-    def predict(self, dictation: str, patient: Patient | None) -> RecommendationResult:
-        services = self._understand_services(dictation)
-        service_candidates = self._retrieve_service_candidates(services)
-        flat_candidates = self._retrieve_flat_candidates()
-        context = _case_context(patient, self._quarter)
-
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            services_future = (
-                executor.submit(
-                    self._select_services,
-                    service_candidates,
-                    dictation,
-                    context,
-                )
-                if service_candidates
-                else None
-            )
-            flat_future = (
-                executor.submit(
-                    self._select_flat_rates,
-                    flat_candidates,
-                    dictation,
-                    context,
-                )
-                if flat_candidates
-                else None
-            )
-
-            service_results = services_future.result() if services_future else []
-            flat_result = flat_future.result() if flat_future else None
-
+    def _merge_recommendations(self, state: WorkflowState) -> WorkflowState:
         recommendations: list[Recommendation] = []
         seen: set[str] = set()
-        for result, (_, candidates) in zip(service_results, service_candidates):
-            _add_offered(recommendations, seen, result, candidates)
-        if flat_result is not None:
-            _add_offered(recommendations, seen, flat_result, flat_candidates)
-        return RecommendationResult(recommendations=recommendations)
+        for result in state["service_results"]:
+            _add_unique(recommendations, seen, result)
+        _add_unique(recommendations, seen, state["flat_result"])
+        return {"result": RecommendationResult(recommendations=recommendations)}
+
+    def predict(self, dictation: str, patient: Patient | None) -> RecommendationResult:
+        state = self._graph.invoke(
+            {
+                "dictation": dictation,
+                "context": _case_context(patient, self._quarter),
+            },
+            config={"run_name": "workflow"},
+        )
+        return state["result"]
 
     def close(self) -> None:
         self._close_resources()
