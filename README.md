@@ -58,40 +58,12 @@ The following predictors were implemented to compare different strategies:
 
 ```mermaid
 flowchart TD
-    A["Original dictation"]:::source
-    H["Patient context and history"]:::source
-
-    subgraph SERVICE["Service-specific path"]
-        direction LR
-        B["LLM extracts<br/>separate services"]:::llm
-        C["One hypothetical description<br/>per service"]:::hyde
-        D[("HyDE retrieval<br/>from the EBM index")]:::retrieval
-        B --> C --> D
-    end
-
-    subgraph FLAT["Independent flat-rate path"]
-        direction LR
-        E["General hypothetical descriptions<br/>for flat rates and add-ons"]:::hyde
-        F[("HyDE retrieval<br/>from the EBM index")]:::retrieval
-        E --> F
-    end
-
-    A --> B
-    A --> V["Original dictation<br/>and case context"]:::context
-    H --> V
-    D --> G["LLM validates each<br/>service candidate"]:::llm
-    F --> I["LLM jointly validates<br/>flat-rate candidates"]:::llm
-    V --> G
-    V --> I
-    G --> J["Merge valid GOP recommendations"]:::result
-    I --> J
-
-    classDef source fill:#ede9fe,stroke:#7c3aed,color:#111827,stroke-width:2px
-    classDef context fill:#f5f3ff,stroke:#8b5cf6,color:#111827
-    classDef llm fill:#fff7ed,stroke:#f97316,color:#111827,stroke-width:2px
-    classDef hyde fill:#ecfdf5,stroke:#10b981,color:#111827,stroke-width:2px
-    classDef retrieval fill:#eff6ff,stroke:#3b82f6,color:#111827,stroke-width:2px
-    classDef result fill:#f3f4f6,stroke:#374151,color:#111827,stroke-width:2px
+    A["Original dictation<br/>and patient context"] --> B["LLM extracts<br/>separate services"]
+    B --> C["HyDE search<br/>for each service"]
+    A --> D["Independent HyDE search<br/>for flat rates"]
+    C --> E["LLM validates candidates<br/>against the original dictation"]
+    D --> E
+    E --> F["GOP recommendations"]
 ```
 
 ## Running evaluations
