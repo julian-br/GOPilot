@@ -1,33 +1,23 @@
 # GOPilot
 
 GOPilot explores AI-assisted billing-code recommendations based on the EBM (Einheitlicher
-Bewertungsmaßstab) for German GP practices. Given a doctor's dictation and patient context, it
-recommends GOP (Gebührenordnungsposition) codes from the EBM catalogue.
-
-In Germany's statutory health insurance system, the EBM defines billable outpatient medical
-services and the conditions attached to them. Practices document these services using GOP codes,
-which form the basis for reimbursement.
+Bewertungsmaßstab) for German GP practices. In Germany's statutory health insurance system,
+practices use GOP (Gebührenordnungsposition) codes to document billable outpatient services. Given
+a doctor's dictation and patient context, GOPilot recommends matching codes from the catalogue.
 
 EBM billing requires substantial domain knowledge because documented services must be matched with
-catalogue rules, patient context, and prior contacts. Omitting valid codes can result in lost revenue,
-while incorrect codes can cause rejected claims, corrections, or repayment risks.
-
-GOPilot is an exploratory evaluation project, not a production-ready autonomous billing system.
-Its main focus is the use of a small local model for billing assistance, as processing highly
-sensitive patient data locally would offer practical data-protection benefits.
+catalogue rules and prior contacts. Omissions can result in lost revenue, while incorrect codes can
+cause rejected claims or repayment risks. GOPilot is an exploratory evaluation project focused on
+small local models so sensitive patient data can remain on site, not a production-ready billing
+system.
 
 ## Data source
 
-The EBM catalogue comes from the SDEBM (Stammdatei für den EBM) published by the KBV
-(Kassenärztliche Bundesvereinigung), not from the PDF:
-[update.kbv.de/ita-update/Stammdateien/KBV_Stammdateien/](https://update.kbv.de/ita-update/Stammdateien/KBV_Stammdateien/)
-
-`python setup.py` downloads the installer JAR and extracts record type 850 (the nationwide EBM) as
-XML.
-
-Setup writes the catalogue to the versioned Qdrant collection specified by `ebm_collection`.
-Retrieval-based runs derive their catalogue quarter from the collection name (for example,
-`ebm_2026_q4`).
+GOPilot uses the official SDEBM (Stammdatei für den EBM) published by the KBV (Kassenärztliche
+Bundesvereinigung), rather than parsing the PDF ([source](https://update.kbv.de/ita-update/Stammdateien/KBV_Stammdateien/)).
+`python setup.py` extracts the nationwide EBM XML from the downloaded JAR and writes it to the
+versioned Qdrant collection specified by `ebm_collection`; retrieval runs derive the catalogue
+quarter from its name, for example `ebm_2026_q4`.
 
 ## Setup
 
