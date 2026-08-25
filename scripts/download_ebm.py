@@ -26,10 +26,6 @@ def main() -> None:
         for name in archive.namelist()
         if PurePosixPath(name).name.startswith("S_") and name.endswith(".xml")
     ]
-    if not master_files:
-        raise FileNotFoundError("record type 850 is missing from the KBV archive")
-    if not keytab_files:
-        raise FileNotFoundError("key tables are missing from the KBV archive")
 
     EBM.mkdir(parents=True, exist_ok=True)
     EBM_KEYTABS.mkdir(parents=True, exist_ok=True)

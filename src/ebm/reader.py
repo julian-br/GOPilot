@@ -32,8 +32,6 @@ def load_gops(
 def load_quarter(path: Path = EBM_MASTER) -> str:
     root = ET.parse(path).getroot()
     period = root.find(f"{HEADER_TAG}/{SERVICE_PERIOD_TAG}")
-    if period is None or not period.get("V"):
-        raise ValueError("EBM catalogue has no service period")
     year, month, _ = map(int, period.get("V").split("..", 1)[0].split("-"))
     return f"{(month - 1) // 3 + 1}/{year}"
 

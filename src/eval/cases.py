@@ -4,7 +4,6 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from src.ebm.version import parse_quarter
 from src.paths import DATA
 from src.patient import Patient, PriorContact
 
@@ -37,7 +36,7 @@ def _case(raw: dict) -> Case:
     patient = raw["patient"]
     return Case(
         case_id=raw["case_id"],
-        quarter=parse_quarter(raw["quartal"]),
+        quarter=raw["quartal"],
         dictation=raw["dictation"],
         patient=Patient(
             id=patient["id"],

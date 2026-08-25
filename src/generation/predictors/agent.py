@@ -61,10 +61,7 @@ class AgentPredictor:
                 ]
             }
         )
-        result = output.get("structured_response")
-        if not isinstance(result, RecommendationResult):
-            raise ValueError("agent did not return a valid structured response")
-        return result
+        return output["structured_response"]
 
     def close(self) -> None:
         self._close_resources()

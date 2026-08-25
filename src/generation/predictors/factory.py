@@ -22,39 +22,33 @@ def build_predictor(config: Config) -> Predictor:
         config.ebm_collection,
         config.retriever,
     )
-    try:
-        retriever = build_retriever(
-            store,
-            config.practice_specialty,
-            config.top_k,
-            config.reranker,
+    retriever = build_retriever(
+        store,
+        config.practice_specialty,
+        config.top_k,
+        config.reranker,
+    )
+    if isinstance(config, WorkflowConfig):
+        return WorkflowPredictor(
+            model,
+            retriever,
+            config.catalogue_quarter,
+            config.max_services,
+            config.max_candidates_per_path,
+            store.client.close,
         )
-        if isinstance(config, WorkflowConfig):
-            predictor = WorkflowPredictor(
-                model,
-                retriever,
-                config.catalogue_quarter,
-                config.max_services,
-                config.max_candidates_per_path,
-                store.client.close,
-            )
-        elif config.generation_strategy == "rag":
-            predictor = RagPredictor(
-                model,
-                retriever,
-                config.catalogue_quarter,
-                store.client.close,
-            )
-        else:
-            predictor = AgentPredictor(
-                model,
-                store,
-                retriever,
-                config.practice_specialty,
-                config.catalogue_quarter,
-                store.client.close,
-            )
-    except Exception:
-        store.client.close()
-        raise
-    return predictor
+    if config.generation_strategy == "rag":
+        return RagPredictor(
+            model,
+            retriever,
+            config.catalogue_quarter,
+            store.client.close,
+        )
+    return AgentPredictor(
+        model,
+        store,
+        retriever,
+        config.practice_specialty,
+        config.catalogue_quarter,
+        store.client.close,
+    )

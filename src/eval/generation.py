@@ -79,8 +79,6 @@ def evaluate_cases(
     parallel: bool = False,
 ) -> CaseResults:
     indexed_cases = list(enumerate(cases, 1))
-    if not indexed_cases:
-        return {}
     if not parallel:
         return dict(
             evaluate_case(predictor, case, index, len(cases))
@@ -152,7 +150,7 @@ def main(
             predictor.close()
         errors = sum("error" in result for result in results.values())
         metrics = classification_metrics(results) | {
-            "generation_error_rate": errors / len(results) if results else 0.0
+            "generation_error_rate": errors / len(results)
         }
 
         mlflow.log_param("cases", len(cases))
