@@ -1,4 +1,3 @@
-experiment: default
 catalogue_quarter: "4/2026"
 generation_strategy: no_rag
 llm_provider: ollama

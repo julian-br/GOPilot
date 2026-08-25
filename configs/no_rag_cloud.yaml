@@ -1,0 +1,5 @@
+catalogue_quarter: "4/2026"
+generation_strategy: no_rag
+llm_provider: openrouter
+llm_model: deepseek/deepseek-v4-flash
+llm_reasoning: medium

@@ -1,8 +1,10 @@
 ebm_collection: ebm_2026_q4
-generation_strategy: agent
+generation_strategy: workflow
 llm_provider: openrouter
 llm_model: deepseek/deepseek-v4-flash
 llm_reasoning: medium
 practice_specialty: "001"
 retriever: hybrid
-top_k: 10
+top_k: 5
+max_services: 10
+max_candidates_per_path: 12

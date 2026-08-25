@@ -12,6 +12,7 @@ import mlflow.openai
 from mlflow.entities import SpanStatusCode
 
 from src.config import DEFAULT_CONFIG, Config, RetrievalConfig, load_config
+from src.eval import MLFLOW_EXPERIMENT
 from src.eval.cases import Case, load_cases, require_catalogue_quarter
 from src.generation.predictors import Predictor, build_predictor
 
@@ -114,13 +115,21 @@ def main(
     config: Config,
     limit: int | None = None,
     parallel: bool = False,
+    case_ids: list[str] | None = None,
 ) -> dict[str, float]:
     cases = load_cases()
+    if case_ids:
+        available = {case.case_id for case in cases}
+        unknown = set(case_ids) - available
+        if unknown:
+            raise ValueError(f"unknown case IDs: {', '.join(sorted(unknown))}")
+        selected = set(case_ids)
+        cases = [case for case in cases if case.case_id in selected]
     if limit is not None:
         cases = cases[:limit]
     require_catalogue_quarter(cases, config.catalogue_quarter)
 
-    mlflow.set_experiment(config.experiment)
+    mlflow.set_experiment(MLFLOW_EXPERIMENT)
     strategy = (
         "rag-rerank"
         if isinstance(config, RetrievalConfig)
@@ -160,6 +169,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--limit", type=int)
     parser.add_argument(
+        "--case",
+        action="append",
+        dest="case_ids",
+        help="evaluate only this case ID; may be supplied more than once",
+    )
+    parser.add_argument(
         "--parallel",
         action="store_true",
         help="evaluate all selected cases concurrently",
@@ -170,6 +185,9 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_args()
     for name, value in main(
-        load_config(args.config), limit=args.limit, parallel=args.parallel
+        load_config(args.config),
+        limit=args.limit,
+        parallel=args.parallel,
+        case_ids=args.case_ids,
     ).items():
         print(f"  {name:<16} {value:.3f}")

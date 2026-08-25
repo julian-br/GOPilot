@@ -19,6 +19,6 @@ class RecommendationResult(BaseModel):
     recommendations: list[Recommendation] = Field(
         description=(
             "Only affirmative EBM GOP billing recommendations for the current visit. "
-            "Never include rejected, already billed, irrelevant, or merely considered codes."
+            "Never include rejected, irrelevant, or merely considered codes."
         )
     )

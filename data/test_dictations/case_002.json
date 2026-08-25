@@ -25,7 +25,7 @@
       }
     ]
   },
-  "dictation": "Herr Müller, 67 Jahre, persönlich in der Sprechstunde. Diabetes Typ 2 und der Bluthochdruck laufen weiter bei uns, HbA1c liegt bei 6,9 Prozent, damit bin ich zufrieden, das hab ich ihm auch so gesagt. Er wirkte gut aufgelegt und erzählt, er sei seit dem Sommer wieder regelmäßig mit dem Hund unterwegs, meist eine halbe Stunde am Tag. Wir haben uns dann in Ruhe unterhalten, vor allem übers Essen, abends werde es oft spät und dann greife er zum Brot, und darüber, dass er die Tabletten morgens öfter vergisst; ich hab ihm gezeigt, wie er das mit einer Wochenbox lösen kann, das will er ausprobieren. Das Langzeit-RR von gestern hab ich ausgewertet, das Gerät lief gut einundzwanzig Stunden durch, tagsüber alle Viertelstunde, nachts halbstündlich, der Puls ist mitgelaufen. Auswertung am Rechner gemacht und befundet: die Nachtabsenkung fehlt.",
+  "dictation": "Herr Müller, 67 Jahre, persönlich in der Sprechstunde. Diabetes Typ 2 und der Bluthochdruck laufen weiter bei uns. Er wirkte gut aufgelegt und erzählt, er sei seit dem Sommer wieder regelmäßig mit dem Hund unterwegs, meist eine halbe Stunde am Tag. Wir haben uns dann in Ruhe unterhalten, vor allem übers Essen, abends werde es oft spät und dann greife er zum Brot, und darüber, dass er die Tabletten morgens öfter vergisst; ich hab ihm gezeigt, wie er das mit einer Wochenbox lösen kann, das will er ausprobieren. Das Langzeit-RR von gestern hab ich ausgewertet, das Gerät lief gut einundzwanzig Stunden durch, tagsüber alle Viertelstunde, nachts halbstündlich, der Puls ist mitgelaufen. Auswertung am Rechner gemacht und befundet: die Nachtabsenkung fehlt.",
   "expected_gops": [
     "03000",
     "03220",

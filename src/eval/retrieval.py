@@ -8,6 +8,7 @@ from langchain_core.retrievers import BaseRetriever
 
 from src.config import DEFAULT_CONFIG, Config, RetrievalConfig, load_config
 from src.db import open_store
+from src.eval import MLFLOW_EXPERIMENT
 from src.eval.cases import Case, load_cases, require_catalogue_quarter
 from src.retrieval import build_retriever
 
@@ -35,7 +36,7 @@ def main(config: Config) -> dict[str, float]:
     if not isinstance(config, RetrievalConfig):
         raise ValueError("retrieval evaluation requires a rag or agent configuration")
 
-    mlflow.set_experiment(config.experiment)
+    mlflow.set_experiment(MLFLOW_EXPERIMENT)
     cases = [c for c in load_cases() if c.expected]
     require_catalogue_quarter(cases, config.catalogue_quarter)
     store = open_store(

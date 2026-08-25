@@ -77,8 +77,15 @@ def open_store(
 
 
 def billable_filter(specialty: str) -> models.Filter:
-    """Codes without a specialty list are billable by anyone, so they must be included."""
+    """Keep regular codes available to the practice and exclude contract pseudo codes."""
     return models.Filter(
+        # Pseudo codes must not be proposed as regular EBM services.
+        must=[
+            models.FieldCondition(
+                key="metadata.code_type",
+                match=models.MatchAny(any=["EBM", "DIFF", "HW"]),
+            )
+        ],
         should=[
             models.FieldCondition(
                 key="metadata.specialties",

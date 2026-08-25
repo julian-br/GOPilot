@@ -1,3 +1,5 @@
+import json
+
 from langchain_core.documents import Document
 
 from src.patient import Patient, PriorContact
@@ -7,7 +9,7 @@ def format_patient_context(
     patient: Patient | None, current_quarter: str
 ) -> str:
     if patient is None:
-        return "Nicht verfuegbar."
+        return "Keine Patientendaten oder vergangenen Kontakte dokumentiert."
 
     def format_contact(contact: PriorContact) -> str:
         return (
@@ -47,7 +49,21 @@ def format_patient_context(
 
 
 def format_candidates(candidates: list[Document]) -> str:
-    return "\n\n".join(
-        f"{candidate.metadata['code']}\n{candidate.page_content}"
-        for candidate in candidates
-    )
+    return "\n\n".join(format_candidate(candidate) for candidate in candidates)
+
+
+def format_candidate(candidate: Document) -> str:
+    parts = [f"GOP {candidate.metadata['code']}", candidate.page_content]
+    annotations = candidate.metadata.get("annotations")
+    if annotations:
+        parts.append(
+            "Anmerkungen:\n"
+            + json.dumps(annotations, ensure_ascii=False, indent=2)
+        )
+    billing_rules = candidate.metadata.get("billing_rules")
+    if billing_rules:
+        parts.append(
+            "Abrechnungsregeln:\n"
+            + json.dumps(billing_rules, ensure_ascii=False, indent=2)
+        )
+    return "\n".join(parts)

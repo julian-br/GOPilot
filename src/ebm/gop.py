@@ -2,6 +2,23 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
+class AgeLimit:
+    boundary: str
+    value: int
+    unit: str | None
+    unit_code: str
+
+
+@dataclass(frozen=True)
+class OccurrenceLimit:
+    max_occurrences: int
+    reference_scope: str | None
+    reference_scope_code: str
+    exception_codes: tuple[str, ...]
+    age_limits: tuple[AgeLimit, ...]
+
+
+@dataclass(frozen=True)
 class GOP:
     """One billing code of the EBM catalogue.
 
@@ -13,6 +30,10 @@ class GOP:
     short_text: str
     long_text: str
     obligatory_content: str
+    annotations: tuple[str, ...]
+    billing_text: str
+    occurrence_limits: tuple[OccurrenceLimit, ...]
+    code_type: str
     specialties: tuple[str, ...]
 
     def billable_by(self, specialty: str) -> bool:

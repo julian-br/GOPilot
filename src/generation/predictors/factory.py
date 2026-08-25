@@ -1,15 +1,20 @@
-from src.config import Config, NoRagConfig, RetrievalConfig
+from src.config import Config, NoRagConfig, RetrievalConfig, WorkflowConfig
 from src.db import open_store
 from src.generation.client import open_chat_model
 from src.generation.predictors.agent import AgentPredictor
 from src.generation.predictors.base import Predictor
 from src.generation.predictors.no_rag import NoRagPredictor
 from src.generation.predictors.rag import RagPredictor
+from src.generation.predictors.workflow import WorkflowPredictor
 from src.retrieval import build_retriever
 
 
 def build_predictor(config: Config) -> Predictor:
-    model = open_chat_model(config.llm_provider, config.llm_model)
+    model = open_chat_model(
+        config.llm_provider,
+        config.llm_model,
+        config.llm_reasoning,
+    )
     if isinstance(config, NoRagConfig):
         return NoRagPredictor(model, config.catalogue_quarter)
 
@@ -24,7 +29,16 @@ def build_predictor(config: Config) -> Predictor:
             config.top_k,
             config.reranker,
         )
-        if config.generation_strategy == "rag":
+        if isinstance(config, WorkflowConfig):
+            predictor = WorkflowPredictor(
+                model,
+                retriever,
+                config.catalogue_quarter,
+                config.max_services,
+                config.max_candidates_per_path,
+                store.client.close,
+            )
+        elif config.generation_strategy == "rag":
             predictor = RagPredictor(
                 model,
                 retriever,

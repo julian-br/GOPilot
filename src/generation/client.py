@@ -11,7 +11,11 @@ from src.paths import ROOT
 OLLAMA_BASE_URL = "http://127.0.0.1:11434/v1"
 
 
-def open_chat_model(provider: str, model: str) -> BaseChatModel:
+def open_chat_model(
+    provider: str,
+    model: str,
+    reasoning: str | None = None,
+) -> BaseChatModel:
     if provider == "ollama":
         return ChatOpenAI(
             model=model,
@@ -28,5 +32,6 @@ def open_chat_model(provider: str, model: str) -> BaseChatModel:
             model=model,
             temperature=0,
             max_retries=2,
+            reasoning={"effort": reasoning} if reasoning is not None else None,
         )
-    raise ValueError(f"unknown LLM provider {provider!r}; expected: ollama, openrouter")
+    raise ValueError(f"unknown LLM provider {provider!r}")

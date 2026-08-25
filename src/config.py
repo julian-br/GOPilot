@@ -29,9 +29,9 @@ class RerankerConfig(BaseModel):
 class BaseConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
-    experiment: str
     llm_provider: Literal["ollama", "openrouter"]
     llm_model: str
+    llm_reasoning: Literal["none", "minimal", "low", "medium", "high"] | None = None
 
 
 class NoRagConfig(BaseConfig):
@@ -64,8 +64,20 @@ class RetrievalConfig(BaseConfig):
         return collection_quarter(self.ebm_collection)
 
 
+class WorkflowConfig(RetrievalConfig):
+    generation_strategy: Literal["workflow"]
+    max_services: PositiveInt
+    max_candidates_per_path: PositiveInt
+
+    @model_validator(mode="after")
+    def validate_workflow_config(self) -> Self:
+        if self.max_candidates_per_path < self.top_k:
+            raise ValueError("max_candidates_per_path must be at least top_k")
+        return self
+
+
 Config: TypeAlias = Annotated[
-    NoRagConfig | RetrievalConfig,
+    NoRagConfig | RetrievalConfig | WorkflowConfig,
     Field(discriminator="generation_strategy"),
 ]
 CONFIG_ADAPTER = TypeAdapter(Config)

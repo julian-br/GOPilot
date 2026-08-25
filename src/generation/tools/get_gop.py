@@ -2,6 +2,7 @@ from langchain_core.tools import BaseTool, tool
 from langchain_qdrant import QdrantVectorStore
 
 from src.db import find_gop
+from src.generation.prompt_inputs import format_candidate
 
 
 def build_get_gop_tool(store: QdrantVectorStore, specialty: str) -> BaseTool:
@@ -16,9 +17,8 @@ def build_get_gop_tool(store: QdrantVectorStore, specialty: str) -> BaseTool:
         billable = not specialties or specialty in specialties
         return "\n".join(
             [
-                f"GOP {document.metadata['code']}",
+                format_candidate(document),
                 f"Fuer Fachgruppe {specialty} abrechenbar: {'ja' if billable else 'nein'}",
-                document.page_content,
             ]
         )
 
